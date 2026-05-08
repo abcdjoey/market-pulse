@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Market Pulse · 每日美股情绪</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f3; --card: #ffffff; --ink: #0a0a0a;
+    --ink-2: #4a4a4a; --ink-3: #8a8a8a; --line: #ececea;
+    --green: #15c47a; --green-soft: #e9faf0; --green-deep: #0d8b56;
+    --purple: #8b5cf6; --purple-soft: #f1ebff;
+    --red: #ef4444; --red-soft: #fde8e8;
+    --amber: #f59e0b; --amber-soft: #fff4dd;
+    --blue: #3b82f6; --blue-soft: #e7f0ff; --gold: #eab308;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg);
+    font-family: 'Noto Sans SC', 'Plus Jakarta Sans', -apple-system, sans-serif;
+    color: var(--ink); padding: 32px 16px; min-height: 100vh;
+  }
+  .frame {
+    max-width: 920px; margin: 0 auto; background: var(--card);
+    border-radius: 28px; padding: 28px 24px 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  }
+  .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .badge-tag {
+    background: #0a0a0a; color: white; padding: 9px 18px; border-radius: 999px;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 12px;
+    letter-spacing: 0.12em; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .badge-tag::before { content: "◆"; color: #ffd84d; font-size: 10px; }
+  .date-tag {
+    background: #f0f0ee; padding: 9px 18px; border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: var(--ink-2);
+  }
+  h1 { font-size: 38px; font-weight: 900; letter-spacing: -0.01em; margin-bottom: 8px; line-height: 1.1; }
+  .subtitle { font-size: 12px; color: var(--ink-3); margin-bottom: 22px; font-family: 'JetBrains Mono', monospace; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card {
+    background: var(--card); border: 1.5px solid var(--line);
+    border-radius: 18px; padding: 18px 18px 16px; position: relative;
+  }
+  .card-tab { position: absolute; top: 0; left: 18px; width: 32px; height: 4px; border-radius: 0 0 4px 4px; }
+  .card-tab.green { background: var(--green); }
+  .card-tab.purple { background: var(--purple); }
+  .card-tab.amber { background: var(--amber); }
+  .card-tab.gold { background: var(--gold); }
+  .card-tab.blue { background: var(--blue); }
+
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 0.02em; }
+  .card-sub { font-size: 11px; color: var(--ink-3); margin-top: 3px; font-weight: 500; }
+
+  .pill {
+    padding: 4px 11px; border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 11px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .pill.up { background: var(--green-soft); color: var(--green-deep); }
+  .pill.down { background: var(--red-soft); color: var(--red); }
+  .pill.flat { background: #f0f0ee; color: var(--ink-2); }
+
+  .big-num { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 42px; letter-spacing: -0.02em; line-height: 1; margin: 14px 0 4px; }
+  .big-num.center { text-align: center; margin: 18px 0 8px; }
+  .change-line { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 8px; }
+  .change-line .tag.up { color: var(--green-deep); }
+  .change-line .tag.dn { color: var(--red); }
+  .meta-line { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ink-2); margin-bottom: 4px; }
+  .meta-line .key { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--ink); }
+  .meta-line .desc { color: var(--ink-3); }
+
+  .status-pill { display: inline-block; padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; border: 1.5px solid; }
+  .status-wrap { text-align: center; margin-bottom: 14px; }
+  .status-pill.green { background: var(--green-soft); color: var(--green-deep); border-color: var(--green); }
+  .status-pill.purple { background: var(--purple-soft); color: var(--purple); border-color: var(--purple); }
+  .status-pill.amber { background: var(--amber-soft); color: var(--amber); border-color: var(--amber); }
+  .status-pill.red { background: var(--red-soft); color: var(--red); border-color: var(--red); }
+
+  .zones { display: grid; grid-template-columns: 56px 1fr 1fr auto; gap: 4px 12px; font-size: 11px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .zones .row { display: contents; }
+  .zones .range { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--ink-3); }
+  .zones .emo, .zones .strat { color: var(--ink-2); font-weight: 500; }
+  .zones .now-tag { background: var(--green); color: white; padding: 1px 7px; border-radius: 4px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 0.08em; }
+  .zones .now-tag.purple { background: var(--purple); }
+  .zones .now-tag.amber { background: var(--amber); }
+  .zones .row.active .range, .zones .row.active .emo, .zones .row.active .strat { color: var(--ink); font-weight: 700; }
+  .zones .row.active .range { color: var(--amber); }
+
+  .spark { width: 100%; height: 50px; margin-top: 10px; }
+
+  .fg-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-top: 14px; }
+  .fg-seg { height: 9px; border-radius: 3px; }
+  .fg-seg.s1 { background: #fecaca; } .fg-seg.s2 { background: #fed7aa; }
+  .fg-seg.s3 { background: #d4d4d8; } .fg-seg.s4 { background: #fde68a; } .fg-seg.s5 { background: #fca5a5; }
+  .fg-labels { display: grid; grid-template-columns: repeat(5, 1fr); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 600; color: var(--ink-3); text-align: center; margin-top: 6px; }
+  .fg-pointer { position: relative; height: 0; }
+  .fg-pointer .arrow { position: absolute; top: -4px; transform: translateX(-50%); color: var(--amber); font-size: 14px; font-weight: 900; }
+
+  .playbook { display: grid; grid-template-columns: 70px 1fr 1fr; font-size: 11.5px; gap: 10px 14px; margin-top: 14px; }
+  .playbook .h { font-weight: 700; color: var(--ink-3); font-size: 10px; border-bottom: 1px solid var(--line); padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .playbook .pb-row { display: contents; }
+  .playbook .rng { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  .playbook .pb-row.r1 .rng { color: var(--red); }
+  .playbook .pb-row.r2 .rng { color: var(--amber); }
+  .playbook .pb-row.r3 .rng { color: var(--ink-3); }
+  .playbook .pb-row.r4 .rng { color: var(--amber); }
+  .playbook .pb-row.r5 .rng { color: var(--red); }
+  .playbook .now-mini { background: var(--amber); color: white; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; margin-left: 6px; vertical-align: middle; }
+
+  .mini-card { padding: 14px 18px; }
+  .mini-card .row1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .mini-card .price { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 26px; margin-top: 2px; }
+  .mini-card .sub { font-size: 10.5px; color: var(--ink-3); margin-bottom: 4px; }
+  .mini-card .spark { height: 38px; margin-top: 6px; }
+
+  .strategy { margin-top: 14px; background: linear-gradient(135deg, #e9faf0 0%, #ddf5e7 100%); border-radius: 16px; padding: 14px 18px; }
+  .strategy-head { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.06em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .strategy-head::before { content: "◆"; color: var(--green-deep); }
+  .strategy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .strat-pill { background: white; border-radius: 10px; padding: 10px 8px; text-align: center; border: 1px solid rgba(13,139,86,0.15); }
+  .strat-pill .top { font-family: 'Noto Sans SC', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .strat-pill .bot { font-size: 10.5px; color: var(--ink-2); }
+
+  .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 4px 4px; font-size: 10px; color: var(--ink-3); }
+  .footer .src { font-family: 'JetBrains Mono', monospace; }
+
+  .loading { text-align: center; padding: 80px 20px; color: var(--ink-3); }
+  .loading .spinner { width: 36px; height: 36px; border: 3px solid var(--line); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box { background: var(--red-soft); border: 1.5px solid var(--red); border-radius: 12px; padding: 14px 18px; color: var(--red); font-size: 13px; margin: 14px 0; }
+
+  @media (max-width: 640px) {
+    body { padding: 12px 8px; }
+    .frame { padding: 20px 14px 14px; border-radius: 20px; }
+    h1 { font-size: 26px; }
+    .big-num { font-size: 34px; }
+    .mini-card .price { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="frame" id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div>正在加载市场数据…</div>
+  </div>
+</div>
+
+<script>
+// ====== 渲染逻辑 ======
+async function loadData() {
+  try {
+    // 加上时间戳防止浏览器缓存旧数据
+    const res = await fetch('data.json?t=' + Date.now());
+    if (!res.ok) throw new Error('数据加载失败 ' + res.status);
+    const d = await res.json();
+    render(d);
+  } catch (e) {
+    document.getElementById('app').innerHTML =
+      '<div class="error-box">⚠️ 数据加载失败：' + e.message + '<br>请检查 data.json 是否存在并可访问。</div>';
+  }
+}
+
+function fmtNum(n) {
+  return n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+function fmtInt(n) { return Math.round(n).toLocaleString('en-US'); }
+function pillClass(pct) { return pct > 0.05 ? 'up' : pct < -0.05 ? 'down' : 'flat'; }
+function pillArrow(pct) { return pct > 0.05 ? '▲ ' : pct < -0.05 ? '▼ ' : '— '; }
+function tagClass(v) { return v > 0 ? 'up' : v < 0 ? 'dn' : ''; }
+
+// 生成趋势线 SVG path
+function trendPath(values, w, h) {
+  if (!values || values.length < 2) return '';
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  return values.map((v, i) => {
+    const x = (i / (values.length - 1)) * w;
+    const y = h - ((v - min) / range) * h * 0.85 - 4;
+    return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+}
+
+function renderSparkline(values, color, gradId) {
+  if (!values || values.length < 2) return '';
+  const w = 300, h = 50;
+  const path = trendPath(values, w, h);
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  const lastY = h - ((values[values.length-1] - min) / range) * h * 0.85 - 4;
+  return `
+    <svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="${gradId}" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${path} L${w},${h} L0,${h} Z" fill="url(#${gradId})"/>
+      <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${w}" cy="${lastY.toFixed(1)}" r="4" fill="${color}"/>
+      <text x="0" y="49" font-family="JetBrains Mono" font-size="8" fill="#8a8a8a">'16</text>
+      <text x="120" y="49" font-family="JetBrains Mono" font-size="8" fill="#8a8a8a">'20</text>
+      <text x="240" y="49" font-family="JetBrains Mono" font-size="8" fill="#8a8a8a">'24</text>
+    </svg>`;
+}
+
+function miniSparkline(values, color) {
+  if (!values || values.length < 2) return '';
+  const w = 300, h = 38;
+  const path = trendPath(values, w, h);
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  const lastY = h - ((values[values.length-1] - min) / range) * h * 0.85 - 4;
+  return `
+    <svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${w}" cy="${lastY.toFixed(1)}" r="3.5" fill="${color}"/>
+    </svg>`;
+}
+
+function zoneBlock(zones, activeIdx, color) {
+  return zones.map((z, i) => {
+    const active = i === activeIdx ? ' active' : '';
+    const tag = i === activeIdx ? `<span class="now-tag ${color}">NOW</span>` : '';
+    return `<div class="row${active}"><span class="range">${z.range}</span><span class="emo">${z.emo}</span><span class="strat">${z.strat}</span>${tag}</div>`;
+  }).join('');
+}
+
+function render(d) {
+  const VIX_ZONES = [
+    {range: '< 12', emo: '极度乐观', strat: '谨慎追高'},
+    {range: '12 — 20', emo: '正常区间', strat: '常规定投'},
+    {range: '20 — 30', emo: '恐惧上升', strat: '加大定投'},
+    {range: '30 — 50', emo: '市场恐慌', strat: '加倍定投'},
+    {range: '> 50', emo: '极度恐慌', strat: '大胆抄底'},
+  ];
+  const VXN_ZONES = [
+    {range: '< 15', emo: '极度乐观', strat: '谨慎追高'},
+    {range: '15 — 22', emo: '正常区间', strat: '常规定投'},
+    {range: '22 — 32', emo: '恐惧上升', strat: '加大定投'},
+    {range: '32 — 55', emo: '市场恐慌', strat: '加倍定投'},
+    {range: '> 55', emo: '极度恐慌', strat: '大胆抄底'},
+  ];
+  const RSI_ZONES = [
+    {range: '< 30', emo: '超卖', strat: '黄金机会'},
+    {range: '30 — 50', emo: '偏弱', strat: '加大定投'},
+    {range: '50 — 70', emo: '中性', strat: '常规定投'},
+    {range: '70 — 80', emo: '偏强', strat: '谨慎追高'},
+    {range: '> 80', emo: '超买', strat: '部分止盈'},
+  ];
+
+  const spx = d.SPX, ndx = d.NDX, vix = d.VIX, vxn = d.VXN;
+  const gold = d.GOLD, tnx = d.TNX, fg = d.FG;
+  const meta = d.meta;
+
+  // F&G 指针位置
+  const fgPos = fg ? Math.min(98, Math.max(2, fg.score)) + '%' : '50%';
+  const fgZoneIdx = fg && fg.zone ? fg.zone.idx : 2;
+
+  const html = `
+    <div class="top-row">
+      <div class="badge-tag">DAILY MARKET PULSE</div>
+      <div class="date-tag">${meta.date_str} / ${meta.weekday}</div>
+    </div>
+    <h1>今日美股情绪观察</h1>
+    <div class="subtitle">数据更新时间：${meta.updated_at}</div>
+
+    <!-- 指数 -->
+    <div class="grid">
+      <div class="card">
+        <div class="card-tab green"></div>
+        <div class="card-head">
+          <div><div class="card-title">S&amp;P 500 · ^GSPC</div><div class="card-sub">标普500 · 收盘 ${spx.date}</div></div>
+          <div class="pill ${pillClass(spx.change_pct)}">${pillArrow(spx.change_pct)}${spx.change_pct >= 0 ? '+' : ''}${spx.change_pct}%</div>
+        </div>
+        <div class="big-num">${fmtNum(spx.last)}</div>
+        <div class="change-line"><span class="tag ${tagClass(spx.change_abs)}">${spx.change_abs >= 0 ? '+' : ''}${spx.change_abs}</span></div>
+        <div class="meta-line"><span class="key">10Y TREND</span><span class="desc">· 近十年走势</span></div>
+        ${renderSparkline(spx.trend, '#15c47a', 'gGrad')}
+      </div>
+      <div class="card">
+        <div class="card-tab purple"></div>
+        <div class="card-head">
+          <div><div class="card-title">NASDAQ 100 · ^NDX</div><div class="card-sub">纳指100 · 收盘 ${ndx.date}</div></div>
+          <div class="pill ${pillClass(ndx.change_pct)}">${pillArrow(ndx.change_pct)}${ndx.change_pct >= 0 ? '+' : ''}${ndx.change_pct}%</div>
+        </div>
+        <div class="big-num">${fmtNum(ndx.last)}</div>
+        <div class="change-line"><span class="tag ${tagClass(ndx.change_abs)}">${ndx.change_abs >= 0 ? '+' : ''}${ndx.change_abs}</span></div>
+        <div class="meta-line"><span class="key">10Y TREND</span><span class="desc">· 近十年走势</span></div>
+        ${renderSparkline(ndx.trend, '#8b5cf6', 'pGrad')}
+      </div>
+    </div>
+
+    <!-- VIX & VXN -->
+    <div class="grid" style="margin-top: 14px;">
+      <div class="card">
+        <div class="card-tab green"></div>
+        <div class="card-head"><div><div class="card-title">VIX · ${vix.change_pct >= 0 ? '+' : ''}${vix.change_pct}%</div><div class="card-sub">标普500波动率 · ${vix.change_abs >= 0 ? '+' : ''}${vix.change_abs}</div></div></div>
+        <div class="big-num center">${fmtNum(vix.last)}</div>
+        <div class="status-wrap"><span class="status-pill ${vix.zone.color}">${vix.zone.label_cn} ${vix.zone.label_en}</span></div>
+        <div class="zones">${zoneBlock(VIX_ZONES, vix.zone.idx, vix.zone.color)}</div>
+      </div>
+      <div class="card">
+        <div class="card-tab purple"></div>
+        <div class="card-head"><div><div class="card-title">VXN · ${vxn.change_pct >= 0 ? '+' : ''}${vxn.change_pct}%</div><div class="card-sub">纳指100波动率 · ${vxn.change_abs >= 0 ? '+' : ''}${vxn.change_abs}</div></div></div>
+        <div class="big-num center">${fmtNum(vxn.last)}</div>
+        <div class="status-wrap"><span class="status-pill ${vxn.zone.color}">${vxn.zone.label_cn} ${vxn.zone.label_en}</span></div>
+        <div class="zones">${zoneBlock(VXN_ZONES, vxn.zone.idx, vxn.zone.color)}</div>
+      </div>
+    </div>
+
+    <!-- RSI -->
+    <div class="grid" style="margin-top: 14px;">
+      <div class="card">
+        <div class="card-tab green"></div>
+        <div class="card-head"><div><div class="card-title">S&amp;P RSI(14) · ${spx.rsi_change >= 0 ? '+' : ''}${spx.rsi_change}</div><div class="card-sub">标普500相对强弱 · ${spx.rsi_change >= 0 ? '+' : ''}${spx.rsi_change}</div></div></div>
+        <div class="big-num center">${spx.rsi}</div>
+        <div class="status-wrap"><span class="status-pill ${spx.rsi_zone.color}">${spx.rsi_zone.label_cn} ${spx.rsi_zone.label_en}</span></div>
+        <div class="zones">${zoneBlock(RSI_ZONES, spx.rsi_zone.idx, spx.rsi_zone.color)}</div>
+      </div>
+      <div class="card">
+        <div class="card-tab purple"></div>
+        <div class="card-head"><div><div class="card-title">NDX RSI(14) · ${ndx.rsi_change >= 0 ? '+' : ''}${ndx.rsi_change}</div><div class="card-sub">纳指100相对强弱 · ${ndx.rsi_change >= 0 ? '+' : ''}${ndx.rsi_change}</div></div></div>
+        <div class="big-num center">${ndx.rsi}</div>
+        <div class="status-wrap"><span class="status-pill ${ndx.rsi_zone.color}">${ndx.rsi_zone.label_cn} ${ndx.rsi_zone.label_en}</span></div>
+        <div class="zones">${zoneBlock(RSI_ZONES, ndx.rsi_zone.idx, ndx.rsi_zone.color)}</div>
+      </div>
+    </div>
+
+    <!-- F&G -->
+    ${fg ? `
+    <div class="grid" style="margin-top: 14px;">
+      <div class="card">
+        <div class="card-tab amber"></div>
+        <div class="card-head"><div><div class="card-title">FEAR &amp; GREED · ${fg.change >= 0 ? '+' : ''}${fg.change}</div><div class="card-sub">恐惧与贪婪指数 · 针对标普500</div></div></div>
+        <div class="big-num center">${fg.score}</div>
+        <div class="status-wrap"><span class="status-pill ${fg.zone.color}">${fg.zone.label_cn} ${fg.zone.label_en}</span></div>
+        <div class="fg-pointer"><span class="arrow" style="left: ${fgPos};">▼</span></div>
+        <div class="fg-bar"><div class="fg-seg s1"></div><div class="fg-seg s2"></div><div class="fg-seg s3"></div><div class="fg-seg s4"></div><div class="fg-seg s5"></div></div>
+        <div class="fg-labels"><div>0-24</div><div>25-44</div><div>45-55</div><div>56-75</div><div>76-100</div></div>
+      </div>
+      <div class="card">
+        <div class="card-tab amber"></div>
+        <div class="card-head"><div><div class="card-title">F&amp;G PLAYBOOK</div><div class="card-sub">F&amp;G · 针对标普500</div></div></div>
+        <div class="playbook">
+          <div class="h">区间</div><div class="h">情绪</div><div class="h">策略</div>
+          <div class="pb-row r1"><span class="rng">0-24</span><span>极度恐惧 ${fgZoneIdx===0?'<span class="now-mini">NOW</span>':''}</span><span>加倍买入</span></div>
+          <div class="pb-row r2"><span class="rng">25-44</span><span>恐惧 ${fgZoneIdx===1?'<span class="now-mini">NOW</span>':''}</span><span>加大定投</span></div>
+          <div class="pb-row r3"><span class="rng">45-55</span><span>中性 ${fgZoneIdx===2?'<span class="now-mini">NOW</span>':''}</span><span>常规定投</span></div>
+          <div class="pb-row r4"><span class="rng">56-75</span><span>贪婪 ${fgZoneIdx===3?'<span class="now-mini">NOW</span>':''}</span><span>谨慎追高</span></div>
+          <div class="pb-row r5"><span class="rng">76-100</span><span>极度贪婪 ${fgZoneIdx===4?'<span class="now-mini">NOW</span>':''}</span><span>部分止盈</span></div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- 黄金 & 美债 -->
+    <div class="grid" style="margin-top: 14px;">
+      ${gold ? `
+      <div class="card mini-card">
+        <div class="card-tab gold"></div>
+        <div class="row1"><div><div class="card-title">GOLD · XAU/USD</div><div class="sub">伦敦金 · 美元/盎司</div></div><div class="pill ${pillClass(gold.change_pct)}">${pillArrow(gold.change_pct)}${gold.change_pct >= 0 ? '+' : ''}${gold.change_pct}%</div></div>
+        <div class="price">$${fmtInt(gold.last)}</div>
+        ${miniSparkline(gold.trend, '#eab308')}
+      </div>` : ''}
+      ${tnx ? `
+      <div class="card mini-card">
+        <div class="card-tab blue"></div>
+        <div class="row1"><div><div class="card-title">10Y UST · ^TNX</div><div class="sub">十年期美债收益率</div></div><div class="pill ${pillClass(tnx.change_pct)}">${pillArrow(tnx.change_pct)}${tnx.change_abs >= 0 ? '+' : ''}${tnx.change_abs}pp</div></div>
+        <div class="price">${tnx.last}%</div>
+        ${miniSparkline(tnx.trend, '#3b82f6')}
+      </div>` : ''}
+    </div>
+
+    <!-- 策略 -->
+    ${d.strategy ? `
+    <div class="strategy">
+      <div class="strategy-head">TODAY'S STRATEGY · 今日策略</div>
+      <div class="strategy-grid">
+        ${d.strategy.map(s => `<div class="strat-pill"><div class="top">${s.top}</div><div class="bot">${s.bot}</div></div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    <div class="footer">
+      <div class="src">Data: Yahoo Finance · CNN · CBOE | 仅供参考，非投资建议</div>
+      <div>Daily Market Pulse</div>
+    </div>
+  `;
+
+  document.getElementById('app').innerHTML = html;
+}
+
+loadData();
+</script>
+</body>
+</html>
