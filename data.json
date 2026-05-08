@@ -1,0 +1,91 @@
+{
+  "SPX": {
+    "ticker": "^GSPC",
+    "last": 7367.20,
+    "prev": 7337.11,
+    "change_abs": 30.09,
+    "change_pct": 0.41,
+    "date": "2026-05-08",
+    "rsi": 72.7,
+    "rsi_change": 0.8,
+    "trend": [1900, 2050, 2100, 2240, 2480, 2680, 2800, 2580, 3000, 3300, 3700, 4150, 4400, 3850, 4300, 4900, 5500, 6200, 6800, 7100, 7367],
+    "rsi_zone": {"label_cn": "偏强", "label_en": "OVERBOUGHT", "color": "amber", "idx": 3}
+  },
+  "NDX": {
+    "ticker": "^NDX",
+    "last": 28752.40,
+    "prev": 28563.95,
+    "change_abs": 188.45,
+    "change_pct": 0.66,
+    "date": "2026-05-08",
+    "rsi": 76.1,
+    "rsi_change": 0.6,
+    "trend": [4500, 5100, 5300, 5800, 6500, 7400, 8500, 8800, 8400, 10000, 12000, 15500, 16500, 11200, 14500, 18500, 21500, 24500, 27000, 28000, 28752],
+    "rsi_zone": {"label_cn": "偏强", "label_en": "OVERBOUGHT", "color": "amber", "idx": 3}
+  },
+  "VIX": {
+    "ticker": "^VIX",
+    "last": 17.08,
+    "prev": 17.39,
+    "change_abs": -0.31,
+    "change_pct": -1.78,
+    "date": "2026-05-08",
+    "trend": [13, 14, 12, 16, 13, 22, 28, 18, 15, 14, 16, 19, 16, 28, 22, 17, 17],
+    "zone": {"label_cn": "正常波动", "label_en": "NORMAL", "color": "green", "idx": 1}
+  },
+  "VXN": {
+    "ticker": "^VXN",
+    "last": 23.58,
+    "prev": 23.15,
+    "change_abs": 0.43,
+    "change_pct": 1.86,
+    "date": "2026-05-08",
+    "trend": [16, 17, 15, 19, 16, 26, 32, 22, 19, 18, 20, 24, 21, 32, 25, 22, 23.58],
+    "zone": {"label_cn": "略升", "label_en": "ELEVATED", "color": "purple", "idx": 2}
+  },
+  "GOLD": {
+    "ticker": "GC=F",
+    "last": 4742,
+    "prev": 4711.30,
+    "change_abs": 30.70,
+    "change_pct": 0.65,
+    "date": "2026-05-08",
+    "trend": [1100, 1130, 1180, 1280, 1320, 1450, 1850, 1900, 1830, 1850, 2050, 2400, 3200, 3800, 4742]
+  },
+  "TNX": {
+    "ticker": "^TNX",
+    "last": 4.39,
+    "prev": 4.35,
+    "change_abs": 0.04,
+    "change_pct": 0.92,
+    "date": "2026-05-08",
+    "trend": [1.85, 2.45, 2.30, 2.85, 1.85, 0.65, 1.45, 3.85, 4.20, 4.65, 4.55, 4.35, 4.39]
+  },
+  "FG": {
+    "score": 68,
+    "previous_close": 68,
+    "change": 0,
+    "rating": "greed",
+    "history": [
+      {"date": "2026-04-29", "value": 65},
+      {"date": "2026-04-30", "value": 64},
+      {"date": "2026-05-01", "value": 63},
+      {"date": "2026-05-04", "value": 67},
+      {"date": "2026-05-05", "value": 70},
+      {"date": "2026-05-06", "value": 72},
+      {"date": "2026-05-07", "value": 68},
+      {"date": "2026-05-08", "value": 68}
+    ],
+    "zone": {"label_cn": "贪婪", "label_en": "GREED", "color": "amber", "idx": 3}
+  },
+  "strategy": [
+    {"top": "定投不停", "bot": "节奏继续保持"},
+    {"top": "谨慎追高", "bot": "RSI 已偏强"},
+    {"top": "留好子弹", "bot": "等更深回调点"}
+  ],
+  "meta": {
+    "updated_at": "2026-05-08 15:45 ET",
+    "date_str": "2026 · 05 · 08",
+    "weekday": "周五"
+  }
+}
