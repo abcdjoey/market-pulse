@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETF Pulse Pro · 多ETF机构级研究</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f5f3;--card:#fff;--ink:#0a0a0a;--ink2:#4a4a4a;--ink3:#8a8a8a;--line:#ececea;--green:#15c47a;--gs:#e9faf0;--gd:#0d8b56;--purple:#8b5cf6;--ps:#f1ebff;--red:#ef4444;--rs:#fde8e8;--amber:#f59e0b;--as:#fff4dd;--blue:#3b82f6;--gold:#eab308;--cyan:#06b6d4;--rose:#f43f5e}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);font-family:'Noto Sans SC','Plus Jakarta Sans',-apple-system,sans-serif;color:var(--ink);padding:16px;min-height:100vh}
+.frame{max-width:980px;margin:0 auto;background:var(--card);border-radius:24px;padding:22px 18px 18px;box-shadow:0 4px 24px rgba(0,0,0,.05)}
+.top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.badge{background:linear-gradient(135deg,#0a0a0a,#1f1f1f);color:#fff;padding:7px 16px;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;display:inline-flex;align-items:center;gap:7px}
+.badge::before{content:"⚡";color:#06b6d4;font-size:11px}
+.datetag{background:#f0f0ee;padding:7px 14px;border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--ink2)}
+h1{font-size:clamp(22px,5vw,36px);font-weight:900;letter-spacing:-.01em;margin-bottom:4px}
+.subtitle{font-size:11px;color:var(--ink3);margin-bottom:16px;font-family:'JetBrains Mono',monospace}
+
+/* ETF SWITCHER */
+.switcher{background:linear-gradient(135deg,#fafafa,#f0f0ee);border-radius:14px;padding:12px 14px;margin-bottom:18px;border:1.5px solid var(--line)}
+.switcher-label{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;color:var(--ink3);margin-bottom:8px;text-transform:uppercase}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab-btn{padding:8px 14px;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12px;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink2);transition:all .15s;display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;min-width:78px}
+.tab-btn:hover{border-color:var(--cyan);color:var(--ink)}
+.tab-btn.active{background:#0a0a0a;color:#fff;border-color:#0a0a0a}
+.tab-btn .ticker{font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800}
+.tab-btn .name{font-size:9px;opacity:.65;margin-top:2px;font-weight:500;font-family:'Noto Sans SC',sans-serif}
+
+/* SECTION */
+.section-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;letter-spacing:.08em;color:var(--ink3);margin:18px 0 10px;padding-left:10px;border-left:3px solid var(--cyan);text-transform:uppercase}
+
+.toparlert{border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;border:2px solid}
+.toparlert.red{background:linear-gradient(135deg,#fef2f2 0%,#ffe4e6 100%);border-color:var(--rose)}
+.toparlert.amber{background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border-color:var(--amber)}
+.toparlert.green{background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-color:var(--green)}
+.toparlert-icon{flex-shrink:0;width:36px;height:36px;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900}
+.toparlert.red .toparlert-icon{background:var(--rose)}
+.toparlert.amber .toparlert-icon{background:var(--amber)}
+.toparlert.green .toparlert-icon{background:var(--green)}
+.toparlert-body{flex:1}
+.toparlert-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;margin-bottom:4px;letter-spacing:.05em}
+.toparlert.red .toparlert-title{color:#9f1239}
+.toparlert.amber .toparlert-title{color:#92400e}
+.toparlert.green .toparlert-title{color:#15803d}
+.toparlert-text{font-size:12px;line-height:1.55}
+.toparlert.red .toparlert-text{color:#881337}
+.toparlert.amber .toparlert-text{color:#78350f}
+.toparlert.green .toparlert-text{color:#166534}
+.toparlert-text strong{font-weight:700}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.grid,.grid3{grid-template-columns:1fr}}
+
+.card{border:1.5px solid var(--line);border-radius:16px;padding:16px;position:relative;overflow:hidden;background:#fff}
+.tab{position:absolute;top:0;left:16px;width:28px;height:4px;border-radius:0 0 4px 4px}
+.tab.g{background:var(--green)}.tab.p{background:var(--purple)}.tab.a{background:var(--amber)}.tab.r{background:var(--rose)}.tab.c{background:var(--cyan)}.tab.b{background:var(--blue)}.tab.gold{background:var(--gold)}
+
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:8px}
+.ctitle{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em}
+.csub{font-size:10px;color:var(--ink3);margin-top:2px;font-weight:500}
+.pill{padding:3px 10px;border-radius:999px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;white-space:nowrap;flex-shrink:0}
+.pill.up{background:var(--gs);color:var(--gd)}.pill.dn{background:var(--rs);color:var(--red)}.pill.fl{background:#f0f0ee;color:var(--ink2)}.pill.hot{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#b45309}
+.bignum{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(28px,5.5vw,40px);letter-spacing:-.02em;line-height:1;margin:12px 0 4px}
+.bignum.c{text-align:center;margin:14px 0 8px}
+.chg{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.chg .up{color:var(--gd)}.chg .dn{color:var(--red)}
+.spill{display:inline-block;padding:5px 14px;border-radius:999px;font-size:11px;font-weight:700;border:1.5px solid}
+.sw{text-align:center;margin-bottom:12px}
+.spill.g{background:var(--gs);color:var(--gd);border-color:var(--green)}
+.spill.p{background:var(--ps);color:var(--purple);border-color:var(--purple)}
+.spill.a{background:var(--as);color:var(--amber);border-color:var(--amber)}
+.spill.r{background:var(--rs);color:var(--red);border-color:var(--red)}
+
+.flowbars{margin-top:12px}
+.fbar-row{display:grid;grid-template-columns:60px 1fr 80px;gap:8px;align-items:center;font-size:11px;margin-bottom:7px}
+.fbar-label{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:10px;color:var(--ink3)}
+.fbar-track{height:18px;background:#fafafa;border-radius:4px;position:relative}
+.fbar-track::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line)}
+.fbar-fill{height:100%;border-radius:4px;position:absolute;top:0}
+.fbar-fill.pos{background:linear-gradient(90deg,#86efac,#15c47a);left:50%}
+.fbar-fill.neg{background:linear-gradient(90deg,#fca5a5,#ef4444);right:50%}
+.fbar-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;text-align:right}
+.fbar-val.pos{color:var(--gd)}
+.fbar-val.neg{color:var(--red)}
+
+.ma-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.ma-box{padding:10px;border-radius:10px;text-align:center}
+.ma-box.up{background:#fff7ed;border:1px solid #fed7aa}
+.ma-box.down{background:#f0fdf4;border:1px solid #bbf7d0}
+.ma-box.flat{background:#f8fafc;border:1px solid var(--line)}
+.ma-label{font-size:10px;color:var(--ink3);font-weight:600;font-family:'JetBrains Mono',monospace}
+.ma-value{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;margin-top:4px}
+.ma-box.up .ma-value{color:#b45309}
+.ma-box.down .ma-value{color:var(--gd)}
+.ma-pct{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;margin-top:2px}
+
+/* MFI gauge */
+.gauge-bar{height:10px;background:linear-gradient(90deg,#15c47a 0%,#fde68a 50%,#ef4444 100%);border-radius:99px;margin:14px 0 6px;position:relative}
+.gauge-marker{position:absolute;top:-3px;width:14px;height:14px;background:#0a0a0a;border:2px solid #fff;border-radius:50%;transform:translateX(-50%);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.gauge-labels{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);font-weight:600}
+
+.score-card{background:linear-gradient(135deg,#1f1f1f 0%,#0a0a0a 100%);color:#fff;border-radius:18px;padding:20px;margin-top:16px;position:relative;overflow:hidden}
+.score-head{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:11px;letter-spacing:.12em;opacity:.7;margin-bottom:8px}
+.score-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:64px;letter-spacing:-.04em;line-height:1;display:flex;align-items:baseline;gap:10px}
+.score-num small{font-size:18px;opacity:.5;font-weight:700}
+.score-label{display:inline-block;padding:5px 14px;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;margin-top:10px;color:#fff}
+.score-label.r{background:var(--rose)}
+.score-label.a{background:var(--amber)}
+.score-label.g{background:var(--green)}
+.score-bd{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.15)}
+.score-item{font-size:11px}
+.score-item .v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:#fde68a}
+.score-item .l{opacity:.6;margin-top:2px}
+
+.matrix{margin-top:16px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:14px}
+.matrix-head{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:12px;letter-spacing:.08em;color:var(--ink2);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.matrix-head::before{content:"◆";color:var(--cyan)}
+.mxgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:600px){.mxgrid{grid-template-columns:1fr}}
+.mx-row{padding:10px 12px;border-radius:10px;border-left:3px solid;font-size:12px;line-height:1.5}
+.mx-row.hold{background:#f8fafc;border-color:var(--blue)}
+.mx-row.dca{background:#f0fdf4;border-color:var(--green)}
+.mx-row.trim{background:#fff7ed;border-color:var(--amber)}
+.mx-row.exit{background:#fef2f2;border-color:var(--red)}
+.mx-row strong{display:block;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;margin-bottom:3px}
+.mx-row.hold strong{color:var(--blue)}
+.mx-row.dca strong{color:var(--gd)}
+.mx-row.trim strong{color:#b45309}
+.mx-row.exit strong{color:var(--red)}
+
+.percentile{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:11px}
+.pct-label{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--ink3);width:60px}
+.pct-track{flex:1;height:8px;background:#f0f0ee;border-radius:99px;position:relative;overflow:hidden}
+.pct-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));border-radius:99px}
+.pct-marker{position:absolute;top:-2px;width:12px;height:12px;background:#0a0a0a;border:2px solid #fff;border-radius:50%;transform:translateX(-50%)}
+.pct-val{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:11px;width:48px;text-align:right}
+
+.note{margin-top:10px;padding:8px;border-radius:6px;font-size:10.5px;line-height:1.5}
+.note.r{background:#fef2f2;color:var(--red);border-left:3px solid var(--red)}
+.note.a{background:#fffbeb;color:#92400e;border-left:3px solid var(--amber)}
+.note.g{background:#f0fdf4;color:var(--gd);border-left:3px solid var(--green)}
+.note.b{background:#f0f9ff;color:var(--ink2);border-left:3px solid var(--blue)}
+.note strong{font-weight:700}
+
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:10px;color:var(--ink3);flex-wrap:wrap;gap:4px}
+.footer .src{font-family:'JetBrains Mono',monospace}
+
+/* Loading state hint */
+.loading-hint{padding:20px;text-align:center;color:var(--ink3);font-size:12px;background:#f8fafc;border-radius:10px;margin:10px 0}
+
+/* === 管理面板新增样式 === */
+.manage-btn-top{padding:5px 12px;background:#0a0a0a;color:#fff;border:none;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;margin-left:auto}
+.manage-btn-top:hover{background:#1f1f1f}
+.manage-btn-top::before{content:"⚙"}
+.tab-btn.add-btn{border-style:dashed;color:var(--cyan);min-width:auto;padding:8px 12px;align-items:center;justify-content:center}
+.tab-btn.add-btn:hover{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:18px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px}
+.modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--ink3);padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .15s}
+.modal-close:hover{background:var(--line)}
+.modal-tabs{display:flex;gap:8px;margin-bottom:16px;border-bottom:1.5px solid var(--line);padding-bottom:0;flex-wrap:wrap}
+.modal-tab{padding:10px 14px;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px}
+.modal-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.modal-section{display:none}
+.modal-section.show{display:block}
+.form-row{margin-bottom:14px}
+.form-label{display:block;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;color:var(--ink2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.form-input{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;background:#fafafa;transition:all .15s}
+.form-input:focus{outline:none;border-color:var(--cyan);background:#fff}
+.form-input.small{padding:8px 10px;font-size:12px}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.form-grid2,.form-grid3{grid-template-columns:1fr}}
+.form-helper{font-size:10.5px;color:var(--ink3);margin-top:4px;line-height:1.4}
+.form-helper a{color:var(--cyan);text-decoration:none}
+.section-head{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:12px;letter-spacing:.08em;color:var(--ink3);margin:18px 0 10px;text-transform:uppercase;padding-bottom:6px;border-bottom:1px dashed var(--line)}
+.btn-primary{padding:11px 20px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:8px;transition:all .15s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(6,182,212,.3)}
+.btn-danger{padding:6px 12px;background:var(--rs);color:var(--red);border:1.5px solid var(--red);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;cursor:pointer;transition:all .15s}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-secondary{padding:8px 14px;background:#fff;border:1.5px solid var(--line);color:var(--ink2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all .15s}
+.btn-secondary:hover{border-color:var(--ink2);color:var(--ink)}
+.etf-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fafafa;border:1.5px solid var(--line);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.etf-list-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:120px}
+.etf-list-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px}
+.etf-list-name{font-size:11px;color:var(--ink3)}
+.etf-list-actions{display:flex;gap:6px}
+.empty-state{text-align:center;padding:30px 20px;color:var(--ink3);font-size:12px;background:#fafafa;border-radius:10px;border:2px dashed var(--line)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0a0a0a;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;z-index:200;pointer-events:none}
+.toast.show{opacity:1}
+.sources-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media(max-width:600px){.sources-grid{grid-template-columns:1fr}}
+.source-item{padding:10px 12px;background:#fafafa;border-radius:8px;font-size:12px}
+.source-item strong{display:block;color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;margin-bottom:3px;font-size:12px}
+.source-item a{color:var(--cyan);text-decoration:none;font-size:11px;font-family:'JetBrains Mono',monospace;word-break:break-all}
+.source-item .desc{font-size:10.5px;color:var(--ink3);margin-top:4px;line-height:1.4}
+.switcher-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <div class="top-row">
+    <div class="badge">PULSE PRO · 多ETF切换版</div>
+    <div class="datetag">2026 · 05 · 08 / 周五</div>
+  </div>
+  <h1 id="title">SMH 半导体 ETF</h1>
+  <div class="subtitle" id="subtitle">VanEck Semiconductor · 多维度机构级研究</div>
+
+  <!-- ETF 切换器 -->
+  <div class="switcher">
+    <div class="switcher-top">
+      <span class="switcher-label">📊 我的 ETF · 点击切换数据</span>
+      <button class="manage-btn-top" onclick="openModal()">管理</button>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <!-- 顶部警报 -->
+  <div id="alert"></div>
+
+  <!-- ========== 一、价格与估值 ========== -->
+  <div class="section-title">一、价格与估值</div>
+  <div class="grid" id="section1"></div>
+
+  <!-- ========== 二、资金流向 ========== -->
+  <div class="section-title">二、💰 资金流向（机构动向）</div>
+  <div class="grid" id="section2a"></div>
+  <div class="grid" id="section2b" style="margin-top:12px"></div>
+
+  <!-- ========== 三、技术指标 ========== -->
+  <div class="section-title">三、📊 技术与情绪</div>
+  <div class="grid" id="section3a"></div>
+  <div class="grid" id="section3b" style="margin-top:12px"></div>
+
+  <!-- ========== 四、新增的高价值指标 ========== -->
+  <div class="section-title">四、🎯 进阶指标（基本面+周期）</div>
+  <div class="grid" id="section4"></div>
+
+  <!-- 综合评分 -->
+  <div id="scorebox"></div>
+
+  <!-- 决策矩阵 -->
+  <div id="matrix"></div>
+
+  <div class="footer">
+    <div class="src">Data: VanEck · Yahoo · etfdb · MarketBeat · GuruFocus · CBOE | 仅供参考，非投资建议</div>
+    <div>Pulse Pro</div>
+  </div>
+
+</div>
+
+<script>
+// ============== ETF 数据库 ==============
+const ETF_DATA = {
+  SMH: {
+    name: 'SMH 半导体ETF', category: '半导体',
+    fullName: 'VanEck Semiconductor · 半导体行业ETF',
+    price: 566.54,
+    changePct: 4.90,
+    changeAbs: 26.44,
+    pe: 51.0,
+    yearReturn: 151,
+    weekHigh52: 569.55,
+    weekLow52: 220.10,
+    rsi: 81.4,
+    rsiChange: 6.2,
+    rsiZone: 'r',
+    rsiLabel: '超买 EXTREME',
+    ma50: 478,
+    ma200: 380,
+    ma50pct: 18.5,
+    ma200pct: 49.1,
+    relStrength: 108,
+    relZone: 'r',
+    relLabel: '极度狂热',
+    putCall: 0.62,
+    flow5d: -438,
+    flow1m: 2770,
+    flow3m: 3640,
+    flow1y: 9120,
+    insiderSell: 163.7,
+    insiderBuy: 0,
+    insiderTicker: 'NVDA',
+    f13Buy: 573,
+    f13Sell: 269,
+    f13Inflow: 2.85,
+    f13Outflow: 1.25,
+    mfi: 88,
+    aaiiSentiment: 62,
+    earningsGrowth: 28,
+    priceGrowth: 151,
+    return1Y_pct: 99,
+    return3Y_pct: 95,
+    smartMoneyDiv: -8.2,
+    score: 18,
+    scoreLabel: '极不建议追高',
+    scoreColor: 'r',
+    valScore: 5,
+    flowScore: 3,
+    techScore: 10,
+    alertType: 'red',
+    alertTitle: '🚨 SMART MONEY 出货信号',
+    alertText: 'SMH 价格创历史新高（+4.90%），但<strong>过去 5 天净流出 $4.38 亿</strong>，同时 NVDA 内部人士过去 3 个月 <strong>卖出 $1.64 亿，零买入</strong>。这是教科书级的"价涨量出"背离形态——历史上多次出现在阶段性顶部。'
+  },
+  QQQ: {
+    name: 'QQQ 纳指100ETF', category: '纳指100',
+    fullName: 'Invesco QQQ Trust · 大型科技+成长股ETF',
+    price: 711.23,
+    changePct: 2.34,
+    changeAbs: 16.29,
+    pe: 25.5,
+    yearReturn: 28,
+    weekHigh52: 711.23,
+    weekLow52: 486.20,
+    rsi: 70.8,
+    rsiChange: 2.1,
+    rsiZone: 'a',
+    rsiLabel: '偏强 OVERBOUGHT',
+    ma50: 660,
+    ma200: 633,
+    ma50pct: 7.8,
+    ma200pct: 12.4,
+    relStrength: 18,
+    relZone: 'a',
+    relLabel: '板块强势',
+    putCall: 0.85,
+    flow5d: -2160,
+    flow1m: 10310,
+    flow3m: -1800,
+    flow1y: 19010,
+    insiderSell: 0,
+    insiderBuy: 0,
+    insiderTicker: 'N/A',
+    f13Buy: 1840,
+    f13Sell: 920,
+    f13Inflow: 18.5,
+    f13Outflow: 12.3,
+    mfi: 72,
+    aaiiSentiment: 48,
+    earningsGrowth: 18,
+    priceGrowth: 28,
+    return1Y_pct: 75,
+    return3Y_pct: 80,
+    smartMoneyDiv: -3.5,
+    score: 42,
+    scoreLabel: '中性偏空 · 谨慎',
+    scoreColor: 'a',
+    valScore: 12,
+    flowScore: 10,
+    techScore: 20,
+    alertType: 'amber',
+    alertTitle: '⚠ 资金流向出现裂痕',
+    alertText: 'QQQ 创历史新高，但<strong>5天流出 $21.6 亿，3个月净流出 $18 亿</strong>。短期流出与价格创高的背离是预警信号。估值合理（P/E 25.5），但需观察是否有延续性下跌。'
+  },
+  SPY: {
+    name: 'SPY 标普500ETF', category: '标普500',
+    fullName: 'SPDR S&P 500 · 美国大盘指数ETF',
+    price: 738.10,
+    changePct: 0.41,
+    changeAbs: 3.02,
+    pe: 25.7,
+    yearReturn: 14,
+    weekHigh52: 740.50,
+    weekLow52: 565.30,
+    rsi: 71.9,
+    rsiChange: 0.8,
+    rsiZone: 'a',
+    rsiLabel: '偏强 OVERBOUGHT',
+    ma50: 715,
+    ma200: 690,
+    ma50pct: 3.2,
+    ma200pct: 7.0,
+    relStrength: 0,
+    relZone: 'g',
+    relLabel: '基准（自身）',
+    putCall: 0.95,
+    flow5d: 3200,
+    flow1m: 18500,
+    flow3m: 42000,
+    flow1y: 145000,
+    insiderSell: 0,
+    insiderBuy: 0,
+    insiderTicker: 'N/A',
+    f13Buy: 4500,
+    f13Sell: 1800,
+    f13Inflow: 85,
+    f13Outflow: 42,
+    mfi: 68,
+    aaiiSentiment: 45,
+    earningsGrowth: 12,
+    priceGrowth: 14,
+    return1Y_pct: 62,
+    return3Y_pct: 65,
+    smartMoneyDiv: 0.5,
+    score: 55,
+    scoreLabel: '中性 · 常规节奏',
+    scoreColor: 'a',
+    valScore: 15,
+    flowScore: 18,
+    techScore: 22,
+    alertType: 'amber',
+    alertTitle: '⚖ 信号混合，建议常规节奏',
+    alertText: 'SPY 估值偏高（P/E 25.7），RSI 71.9 偏强，但<strong>资金持续净流入</strong>（5天+$32亿）且广度健康。整体处于"上涨趋势但偏热"状态，适合常规定投，不建议追高加仓。'
+  },
+  VOO: {
+    name: 'VOO 标普500ETF', category: '标普500',
+    fullName: 'Vanguard S&P 500 · 低费率指数ETF',
+    price: 678.50,
+    changePct: 0.41,
+    changeAbs: 2.78,
+    pe: 25.6,
+    yearReturn: 14,
+    weekHigh52: 680.80,
+    weekLow52: 519.50,
+    rsi: 71.9,
+    rsiChange: 0.8,
+    rsiZone: 'a',
+    rsiLabel: '偏强 OVERBOUGHT',
+    ma50: 658,
+    ma200: 634,
+    ma50pct: 3.1,
+    ma200pct: 7.0,
+    relStrength: 0,
+    relZone: 'g',
+    relLabel: '基准（自身）',
+    putCall: 0.92,
+    flow5d: 1850,
+    flow1m: 9200,
+    flow3m: 22500,
+    flow1y: 78000,
+    insiderSell: 0,
+    insiderBuy: 0,
+    insiderTicker: 'N/A',
+    f13Buy: 2800,
+    f13Sell: 1100,
+    f13Inflow: 48,
+    f13Outflow: 22,
+    mfi: 67,
+    aaiiSentiment: 45,
+    earningsGrowth: 12,
+    priceGrowth: 14,
+    return1Y_pct: 62,
+    return3Y_pct: 65,
+    smartMoneyDiv: 0.8,
+    score: 56,
+    scoreLabel: '中性 · 常规节奏',
+    scoreColor: 'a',
+    valScore: 16,
+    flowScore: 18,
+    techScore: 22,
+    alertType: 'green',
+    alertTitle: '✓ 长期资金持续流入',
+    alertText: 'VOO 是标普500的低费率版本（0.03%），<strong>1年净流入 $780 亿</strong>，是机构默认配置选择。当前估值偏高但资金面健康，适合长期定投不卖。'
+  },
+  SOXX: {
+    name: 'SOXX 半导体ETF', category: '半导体',
+    fullName: 'iShares Semiconductor · 半导体30股ETF',
+    price: 492.36,
+    changePct: 4.10,
+    changeAbs: 19.40,
+    pe: 48.5,
+    yearReturn: 138,
+    weekHigh52: 495.00,
+    weekLow52: 198.20,
+    rsi: 79.2,
+    rsiChange: 5.1,
+    rsiZone: 'a',
+    rsiLabel: '偏强 OVERBOUGHT',
+    ma50: 420,
+    ma200: 340,
+    ma50pct: 17.2,
+    ma200pct: 44.8,
+    relStrength: 95,
+    relZone: 'r',
+    relLabel: '极度狂热',
+    putCall: 0.68,
+    flow5d: -120,
+    flow1m: 850,
+    flow3m: 1200,
+    flow1y: 3500,
+    insiderSell: 163.7,
+    insiderBuy: 0,
+    insiderTicker: 'NVDA',
+    f13Buy: 420,
+    f13Sell: 195,
+    f13Inflow: 0.95,
+    f13Outflow: 0.42,
+    mfi: 85,
+    aaiiSentiment: 62,
+    earningsGrowth: 28,
+    priceGrowth: 138,
+    return1Y_pct: 98,
+    return3Y_pct: 92,
+    smartMoneyDiv: -7.5,
+    score: 22,
+    scoreLabel: '高风险 · 谨慎追高',
+    scoreColor: 'r',
+    valScore: 6,
+    flowScore: 5,
+    techScore: 11,
+    alertType: 'red',
+    alertTitle: '🚨 与 SMH 同步信号',
+    alertText: 'SOXX 与 SMH 是半导体行业两大ETF，信号高度一致。SOXX 30只持股比SMH 25只更分散，风险略低，但<strong>P/E 48.5 + 一年涨138% + 5天流出</strong>，仍处于历史极端区域。'
+  },
+  XLK: {
+    name: 'XLK 科技板块ETF', category: '科技板块',
+    fullName: 'Tech Select Sector · 标普500科技板块',
+    price: 285.40,
+    changePct: 1.85,
+    changeAbs: 5.18,
+    pe: 32.5,
+    yearReturn: 38,
+    weekHigh52: 286.20,
+    weekLow52: 198.50,
+    rsi: 73.5,
+    rsiChange: 2.8,
+    rsiZone: 'a',
+    rsiLabel: '偏强 OVERBOUGHT',
+    ma50: 268,
+    ma200: 245,
+    ma50pct: 6.5,
+    ma200pct: 16.5,
+    relStrength: 24,
+    relZone: 'a',
+    relLabel: '板块强势',
+    putCall: 0.78,
+    flow5d: -380,
+    flow1m: 2200,
+    flow3m: 3800,
+    flow1y: 12500,
+    insiderSell: 215,
+    insiderBuy: 12,
+    insiderTicker: 'AAPL/MSFT',
+    f13Buy: 980,
+    f13Sell: 450,
+    f13Inflow: 8.5,
+    f13Outflow: 4.2,
+    mfi: 75,
+    aaiiSentiment: 55,
+    earningsGrowth: 22,
+    priceGrowth: 38,
+    return1Y_pct: 88,
+    return3Y_pct: 85,
+    smartMoneyDiv: -4.8,
+    score: 35,
+    scoreLabel: '偏空 · 减仓信号',
+    scoreColor: 'a',
+    valScore: 9,
+    flowScore: 12,
+    techScore: 14,
+    alertType: 'amber',
+    alertTitle: '⚠ 5天流出，板块降温中',
+    alertText: 'XLK 包含 AAPL/MSFT/NVDA 等科技龙头，<strong>5天流出 $3.8 亿</strong>，估值 P/E 32.5 偏高。一年涨幅 38% 已经反映了大量乐观预期，进一步空间需要新的催化剂。'
+  }
+};
+
+const ETF_LIST = ['SMH', 'QQQ', 'SPY', 'VOO', 'SOXX', 'XLK'];
+const ETF_LABELS = {
+  SMH: '半导体',
+  QQQ: '纳指100',
+  SPY: '标普500',
+  VOO: '标普500',
+  SOXX: '半导体',
+  XLK: '科技板块'
+};
+
+// 工具函数
+const fmt = n => n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const fmtI = n => Math.round(n).toLocaleString('en-US');
+const sgn = v => v >= 0 ? '+' : '';
+const pillCls = v => v > 0.05 ? 'up' : v < -0.05 ? 'dn' : 'fl';
+const pillArrow = v => v > 0.05 ? '▲ ' : v < -0.05 ? '▼ ' : '— ';
+
+function maxFlowAbs(d) {
+  return Math.max(Math.abs(d.flow5d), Math.abs(d.flow1m), Math.abs(d.flow3m), Math.abs(d.flow1y));
+}
+
+function flowBar(label, val, max) {
+  const pct = Math.min(45, Math.abs(val) / max * 45);
+  const isNeg = val < 0;
+  const valDisp = (Math.abs(val) >= 1000) ? `$${(Math.abs(val)/1000).toFixed(2)}B` : `$${Math.abs(val).toFixed(0)}M`;
+  return `
+    <div class="fbar-row">
+      <div class="fbar-label">${label}</div>
+      <div class="fbar-track">
+        <div class="fbar-fill ${isNeg?'neg':'pos'}" style="width:${pct}%"></div>
+      </div>
+      <div class="fbar-val ${isNeg?'neg':'pos'}">${isNeg?'-':'+'}${valDisp}</div>
+    </div>`;
+}
+
+function render(d) {
+  // 标题
+  document.getElementById('title').textContent = d.name;
+  document.getElementById('subtitle').textContent = d.fullName;
+
+  // 顶部警报
+  document.getElementById('alert').innerHTML = `
+    <div class="toparlert ${d.alertType}">
+      <div class="toparlert-icon">${d.alertType==='red'?'!':d.alertType==='amber'?'⚠':'✓'}</div>
+      <div class="toparlert-body">
+        <div class="toparlert-title">${d.alertTitle}</div>
+        <div class="toparlert-text">${d.alertText}</div>
+      </div>
+    </div>`;
+
+  // ===== 第一部分：价格与估值 =====
+  const range52pct = ((d.price - d.weekLow52) / (d.weekHigh52 - d.weekLow52) * 100);
+  const peColor = d.pe > 40 ? 'red' : d.pe > 25 ? 'amber' : 'green';
+  document.getElementById('section1').innerHTML = `
+    <div class="card">
+      <div class="tab c"></div>
+      <div class="card-head">
+        <div><div class="ctitle">${d.name.split(' ')[0]} · 收盘价</div><div class="csub">${d.fullName.split('·')[0].trim()} · 5月8日</div></div>
+        <div class="pill ${pillCls(d.changePct)}">${pillArrow(d.changePct)}${sgn(d.changePct)}${d.changePct}%</div>
+      </div>
+      <div class="bignum">$${fmt(d.price)}</div>
+      <div class="chg"><span class="${d.changeAbs>=0?'up':'dn'}">${sgn(d.changeAbs)}${fmt(d.changeAbs)}</span> · YTD ${sgn(d.yearReturn)}${d.yearReturn}%</div>
+      <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+        <div style="padding:8px;background:${peColor==='red'?'#fef2f2':peColor==='amber'?'#fff7ed':'#f0fdf4'};border-radius:6px">
+          <strong style="color:var(--${peColor==='red'?'red':peColor==='amber'?'amber':'gd'});font-family:'Plus Jakarta Sans',sans-serif;font-size:14px">P/E ${d.pe}</strong>
+          <div style="color:var(--ink3);margin-top:2px">${d.pe>40?'泡沫化':d.pe>25?'偏贵':'合理'}</div>
+        </div>
+        <div style="padding:8px;background:${d.yearReturn>50?'#fff7ed':'#f0fdf4'};border-radius:6px">
+          <strong style="color:${d.yearReturn>50?'var(--amber)':'var(--gd)'};font-family:'Plus Jakarta Sans',sans-serif;font-size:14px">${sgn(d.yearReturn)}${d.yearReturn}%</strong>
+          <div style="color:var(--ink3);margin-top:2px">12月涨幅</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tab ${range52pct>90?'r':range52pct>70?'a':'g'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">52周区间位置</div><div class="csub">距离年内高点</div></div>
+        <div class="pill ${range52pct>90?'hot':'fl'}">${range52pct.toFixed(1)}%</div>
+      </div>
+      <div class="bignum c" style="color:var(--${range52pct>90?'rose':range52pct>70?'amber':'gd'})">${range52pct.toFixed(1)}<span style="font-size:.55em;color:var(--ink3)">%</span></div>
+      <div class="sw"><span class="spill ${range52pct>90?'r':range52pct>70?'a':'g'}">${range52pct>90?'区间顶端':range52pct>70?'偏上区域':'区间中部'}</span></div>
+      <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);font-weight:600;margin-bottom:4px"><span>$${fmtI(d.weekLow52)}</span><span>当前 $${fmtI(d.price)}</span><span>$${fmtI(d.weekHigh52)}</span></div>
+      <div class="gauge-bar"><div class="gauge-marker" style="left:${range52pct}%"></div></div>
+    </div>`;
+
+  // ===== 第二部分：资金流向 =====
+  const maxFlow = maxFlowAbs(d);
+  const insiderBuyPct = d.insiderSell > 0 ? (d.insiderBuy / (d.insiderBuy + d.insiderSell) * 100) : 50;
+  document.getElementById('section2a').innerHTML = `
+    <div class="card">
+      <div class="tab ${d.flow5d<0?'r':'g'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">ETF FUND FLOWS · 资金净流入</div><div class="csub">不同时间维度的资金流向</div></div>
+      </div>
+      <div class="flowbars">
+        ${flowBar('5天', d.flow5d, maxFlow)}
+        ${flowBar('1月', d.flow1m, maxFlow)}
+        ${flowBar('3月', d.flow3m, maxFlow)}
+        ${flowBar('1年', d.flow1y, maxFlow)}
+      </div>
+      <div class="note ${d.flow5d<0&&d.flow1y>0?'r':d.flow5d>0?'g':'a'}">
+        ${d.flow5d<0&&d.flow1y>0?'<strong>⚠ 关键背离</strong>：长期流入但短期开始流出，机构在悄悄派发筹码':
+          d.flow5d>0?'<strong>✓ 资金持续流入</strong>：各时间维度均健康，机构信心强':
+          '<strong>○ 中性</strong>：资金流向未现极端信号'}
+      </div>
+    </div>
+    <div class="card">
+      <div class="tab ${d.insiderSell>50?'r':'g'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">INSIDER ACTIVITY · 内部人士</div><div class="csub">${d.insiderTicker} 高管过去 3 个月</div></div>
+      </div>
+      ${d.insiderTicker !== 'N/A' ? `
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-top:14px">
+          <span style="color:var(--ink3)">买入 vs 卖出比例</span>
+        </div>
+        <div style="display:flex;height:24px;border-radius:6px;overflow:hidden;margin-top:8px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px">
+          ${d.insiderBuy > 0 ? `<div style="background:var(--gs);color:var(--gd);display:flex;align-items:center;justify-content:center;width:${insiderBuyPct}%;min-width:30px">$${d.insiderBuy}M</div>` : ''}
+          <div style="background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;flex:1">${d.insiderBuy>0?'':'100% 卖出 · '}$${d.insiderSell}M</div>
+        </div>
+        <div class="note ${d.insiderBuy===0?'r':'a'}" style="margin-top:8px">
+          <strong>${d.insiderBuy===0?'极不寻常':'警示'}</strong>：3 个月 ${d.insiderBuy>0?d.insiderBuy+'M 买入':'0 买入'} + $${d.insiderSell}M 卖出。<br>
+          内部人士对公司未来前景最了解，集中卖出且零买入历史上常先于股价回调出现。
+        </div>` : `
+        <div class="loading-hint">指数ETF不直接对应单一公司<br>内部人士数据不适用</div>`}
+    </div>`;
+
+  document.getElementById('section2b').innerHTML = `
+    <div class="card">
+      <div class="tab p"></div>
+      <div class="card-head">
+        <div><div class="ctitle">13F · 机构持仓变化</div><div class="csub">过去 12 月</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-size:11px;margin-top:8px">
+        <span style="color:var(--ink2)">买入机构数</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gd)">${d.f13Buy} 家</span>
+        <span style="color:var(--ink2)">卖出机构数</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--red)">${d.f13Sell} 家</span>
+        <span style="color:var(--ink2)">总流入</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gd)">+$${d.f13Inflow}B</span>
+        <span style="color:var(--ink2)">总流出</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--red)">-$${d.f13Outflow}B</span>
+        <span style="color:var(--ink2)">净额</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gd)">+$${(d.f13Inflow-d.f13Outflow).toFixed(2)}B</span>
+      </div>
+      <div class="note b">
+        买入家数仍是卖出 ${(d.f13Buy/d.f13Sell).toFixed(1)} 倍，<strong>卖出金额已达买入 ${(d.f13Outflow/d.f13Inflow*100).toFixed(0)}%</strong>${d.f13Outflow/d.f13Inflow>0.4?'，机构出货比例上升':''}。
+      </div>
+    </div>
+    <div class="card">
+      <div class="tab ${d.smartMoneyDiv<-5?'r':d.smartMoneyDiv<0?'a':'g'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">SMART MONEY DIV · 聪明钱背离</div><div class="csub">收盘最后1小时机构动向</div></div>
+      </div>
+      <div class="bignum c" style="color:var(--${d.smartMoneyDiv<-5?'red':d.smartMoneyDiv<0?'amber':'gd'})">${sgn(d.smartMoneyDiv)}${d.smartMoneyDiv}%</div>
+      <div class="sw"><span class="spill ${d.smartMoneyDiv<-5?'r':d.smartMoneyDiv<0?'a':'g'}">${d.smartMoneyDiv<-5?'机构在抛售':d.smartMoneyDiv<0?'轻度卖出':'机构在买入'}</span></div>
+      <div class="note ${d.smartMoneyDiv<-5?'r':d.smartMoneyDiv<0?'a':'g'}">
+        <strong>原理</strong>：机构常在收盘前最后1小时下大单。指标=收盘最后1h涨幅 - 开盘第1h涨幅。${d.smartMoneyDiv<-5?'当前严重负值，机构在派发，散户在接盘':'当前数值显示机构态度'}。
+      </div>
+    </div>`;
+
+  // ===== 第三部分：技术指标 =====
+  document.getElementById('section3a').innerHTML = `
+    <div class="card">
+      <div class="tab ${d.rsiZone}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">${d.name.split(' ')[0]} RSI(14)</div><div class="csub">相对强弱指数</div></div>
+      </div>
+      <div class="bignum c" style="color:var(--${d.rsiZone==='r'?'red':d.rsiZone==='a'?'amber':'gd'})">${d.rsi}</div>
+      <div class="sw"><span class="spill ${d.rsiZone}">${d.rsiLabel}</span></div>
+      <div class="note ${d.rsi>80?'r':d.rsi>70?'a':d.rsi<30?'g':'b'}">
+        ${d.rsi>80?'RSI > 80 历史上常对应 1-3 个月内的回调，但趋势市可能维持 1-2 个月才反转':
+          d.rsi>70?'RSI 70-80 偏强但还没到极端，趋势仍可继续':
+          d.rsi<30?'RSI < 30 超卖，历史上是较好的买入信号':'RSI 处于中性区间'}
+      </div>
+    </div>
+    <div class="card">
+      <div class="tab ${d.relZone}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">板块相对强度</div><div class="csub">12月跑赢标普500 vs 历史</div></div>
+      </div>
+      <div class="bignum c" style="color:var(--${d.relZone==='r'?'red':d.relZone==='a'?'amber':'gd'})">${sgn(d.relStrength)}${d.relStrength}%</div>
+      <div class="sw"><span class="spill ${d.relZone}">${d.relLabel}</span></div>
+      <div class="note ${d.relStrength>70?'r':d.relStrength>30?'a':'b'}">
+        ${d.relStrength>70?'12月跑赢标普 '+d.relStrength+'%，历史均值 +12%，目前处于 99% 分位极端值':
+          d.relStrength>0?'板块跑赢大盘，但未到极端':'与基准持平或落后'}
+      </div>
+    </div>`;
+
+  // 均线 + Put/Call
+  const above50 = d.price > d.ma50;
+  const above200 = d.price > d.ma200;
+  document.getElementById('section3b').innerHTML = `
+    <div class="card">
+      <div class="tab ${d.ma200pct>30?'r':d.ma200pct>15?'a':'g'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">均线乖离率</div><div class="csub">价格距离 50日/200日均线</div></div>
+      </div>
+      <div class="ma-grid">
+        <div class="ma-box ${above50?'up':'down'}">
+          <div class="ma-label">50日 MA</div>
+          <div class="ma-value">$${fmtI(d.ma50)}</div>
+          <div class="ma-pct" style="color:${above50?'#b45309':'var(--gd)'}">${sgn(d.ma50pct)}${d.ma50pct}%</div>
+        </div>
+        <div class="ma-box ${above200?'up':'down'}">
+          <div class="ma-label">200日 MA</div>
+          <div class="ma-value">$${fmtI(d.ma200)}</div>
+          <div class="ma-pct" style="color:${above200?'#b45309':'var(--gd)'}">${sgn(d.ma200pct)}${d.ma200pct}%</div>
+        </div>
+      </div>
+      <div class="note ${d.ma200pct>30?'r':d.ma200pct>15?'a':'g'}">
+        <strong>${d.ma200pct>30?'⚠ 严重偏离年线':d.ma200pct>15?'轻度偏离':'接近年线'}</strong>：历史上偏离 200日均线 > 30% 时，1年内回归概率 75%。
+      </div>
+    </div>
+    <div class="card">
+      <div class="tab ${d.putCall<0.7?'r':d.putCall>1.5?'g':'a'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">PUT/CALL 期权情绪</div><div class="csub">看跌/看涨期权比率</div></div>
+      </div>
+      <div style="text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:36px;margin:14px 0 4px">${d.putCall}</div>
+      <div class="gauge-bar"><div class="gauge-marker" style="left:${Math.min(95, d.putCall*50)}%"></div></div>
+      <div class="gauge-labels"><span>0 极乐观</span><span>1.0</span><span>2.0+ 极悲观</span></div>
+      <div class="note ${d.putCall<0.7?'r':d.putCall>1.5?'g':'b'}">
+        ${d.putCall<0.7?'<strong>过度乐观</strong>：买"上涨彩票"远超买"下跌保险"，反向看是危险信号':
+          d.putCall>1.5?'<strong>过度悲观</strong>：恐慌已被定价，反向看可能是买入机会':
+          '<strong>正常情绪</strong>：未现极端，市场处于平衡态'}
+      </div>
+    </div>`;
+
+  // ===== 第四部分：进阶指标（新增）=====
+  const valGap = d.priceGrowth - d.earningsGrowth;
+  document.getElementById('section4').innerHTML = `
+    <div class="card">
+      <div class="tab ${d.mfi>80?'r':d.mfi>60?'a':d.mfi<20?'g':'b'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">MFI · 资金流量指数</div><div class="csub">"价格+成交量"加权 RSI</div></div>
+      </div>
+      <div class="bignum c" style="color:var(--${d.mfi>80?'red':d.mfi>60?'amber':d.mfi<20?'gd':'ink2'})">${d.mfi}</div>
+      <div class="sw"><span class="spill ${d.mfi>80?'r':d.mfi>60?'a':d.mfi<20?'g':'p'}">${d.mfi>80?'资金严重涌入':d.mfi>60?'资金流入':d.mfi<20?'资金枯竭':'平衡'}</span></div>
+      <div class="note ${d.mfi>80?'r':d.mfi<20?'g':'b'}">
+        <strong>比 RSI 更准</strong>：MFI 把成交量也算进去。${d.mfi>80?'MFI > 80 时，买盘已透支，常预示回调':d.mfi<20?'MFI < 20 时，卖盘已透支，常是反转点':'当前数值在常规区间'}。
+      </div>
+    </div>
+    <div class="card">
+      <div class="tab ${d.aaiiSentiment>60?'r':d.aaiiSentiment<25?'g':'b'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">AAII 散户情绪</div><div class="csub">散户看涨比例 · 反向指标</div></div>
+      </div>
+      <div class="bignum c" style="color:var(--${d.aaiiSentiment>60?'red':d.aaiiSentiment<25?'gd':'ink2'})">${d.aaiiSentiment}%</div>
+      <div class="sw"><span class="spill ${d.aaiiSentiment>60?'r':d.aaiiSentiment<25?'g':'p'}">${d.aaiiSentiment>60?'散户极度乐观':d.aaiiSentiment<25?'散户极度悲观':'中性'}</span></div>
+      <div class="note ${d.aaiiSentiment>60?'r':d.aaiiSentiment<25?'g':'b'}">
+        <strong>反向指标</strong>：散户最看涨时往往是顶部，最悲观时往往是底部。${d.aaiiSentiment>60?'当前散户乐观度极高，需警惕':d.aaiiSentiment<25?'当前散户悲观，可能是机会':'情绪平衡'}。
+      </div>
+    </div>`;
+
+  // 第二排进阶指标
+  document.getElementById('section4').insertAdjacentHTML('beforeend', `
+    <div class="card" style="margin-top:12px">
+      <div class="tab ${valGap>50?'r':valGap>20?'a':'g'}"></div>
+      <div class="card-head">
+        <div><div class="ctitle">价 vs 业绩 · 增长缺口</div><div class="csub">价格涨幅 - 盈利涨幅</div></div>
+      </div>
+      <div class="bignum c" style="color:var(--${valGap>50?'red':valGap>20?'amber':'gd'})">${sgn(valGap)}${valGap}%</div>
+      <div class="sw"><span class="spill ${valGap>50?'r':valGap>20?'a':'g'}">${valGap>50?'估值严重透支':valGap>20?'轻度透支':'匹配业绩'}</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;font-size:10.5px">
+        <div style="padding:6px 8px;background:#f8fafc;border-radius:6px"><span style="color:var(--ink3)">价格涨幅</span><br><strong style="font-family:'JetBrains Mono',monospace">${sgn(d.priceGrowth)}${d.priceGrowth}%</strong></div>
+        <div style="padding:6px 8px;background:#f8fafc;border-radius:6px"><span style="color:var(--ink3)">盈利增长</span><br><strong style="font-family:'JetBrains Mono',monospace">${sgn(d.earningsGrowth)}${d.earningsGrowth}%</strong></div>
+      </div>
+      <div class="note ${valGap>50?'r':valGap>20?'a':'g'}" style="margin-top:8px">
+        ${valGap>50?'<strong>价格远超基本面</strong>：超额涨幅靠估值扩张，回归历史均值是大概率事件':
+          valGap>20?'<strong>价格略超业绩</strong>：估值有提升但未失控':
+          '<strong>价格匹配业绩</strong>：增长由真实盈利驱动，最健康的状态'}
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="tab a"></div>
+      <div class="card-head">
+        <div><div class="ctitle">历史回报分位数</div><div class="csub">当前回报在历史中的位置</div></div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="percentile">
+          <span class="pct-label">1年回报</span>
+          <div class="pct-track"><div class="pct-fill" style="width:100%"></div><div class="pct-marker" style="left:${d.return1Y_pct}%"></div></div>
+          <span class="pct-val">${d.return1Y_pct}%</span>
+        </div>
+        <div class="percentile" style="margin-top:12px">
+          <span class="pct-label">3年回报</span>
+          <div class="pct-track"><div class="pct-fill" style="width:100%"></div><div class="pct-marker" style="left:${d.return3Y_pct}%"></div></div>
+          <span class="pct-val">${d.return3Y_pct}%</span>
+        </div>
+      </div>
+      <div class="note ${d.return1Y_pct>90?'r':d.return1Y_pct<10?'g':'b'}" style="margin-top:14px">
+        <strong>${d.return1Y_pct>90?'⚠ 极端高位':d.return1Y_pct<10?'极端低位':'正常区间'}</strong>：1年回报处于历史 ${d.return1Y_pct}% 分位${d.return1Y_pct>90?'，统计学上未来回报均值回归概率高':d.return1Y_pct<10?'，统计学上未来反弹概率高':''}。
+      </div>
+    </div>`);
+
+  // ===== 综合评分 =====
+  document.getElementById('scorebox').innerHTML = `
+    <div class="score-card">
+      <div class="score-head">${d.name.split(' ')[0]} 综合评分 · 适合买入度</div>
+      <div class="score-num">${d.score}<small>/100</small></div>
+      <div class="score-label ${d.scoreColor}">${d.score<25?'⚠ ':d.score<50?'⚠ ':'✓ '}${d.scoreLabel}</div>
+      <div class="score-bd">
+        <div class="score-item"><div class="v">${d.valScore}/25</div><div class="l">估值${d.valScore<10?'（极贵）':d.valScore<18?'（偏贵）':'（合理）'}</div></div>
+        <div class="score-item"><div class="v">${d.flowScore}/25</div><div class="l">资金流向${d.flowScore<10?'（背离）':d.flowScore<18?'（疲弱）':'（健康）'}</div></div>
+        <div class="score-item"><div class="v">${d.techScore}/50</div><div class="l">技术情绪${d.techScore<20?'（超买）':d.techScore<35?'（偏强）':'（中性）'}</div></div>
+      </div>
+    </div>`;
+
+  // ===== 决策矩阵 =====
+  let exitText, trimText, holdText, dcaText;
+  if (d.score < 30) {
+    exitText = '部分止盈 30-50%，将利润转入低估资产（能源 XLE / 医疗 XLV / 新兴市场 VWO）。保留底仓继续享受长期红利。';
+    trimText = '暂停所有定投。不主动减仓，但不在此位加任何一分钱。设置 -15% 止损线。';
+    holdText = '<strong style="color:var(--red);display:inline">绝对不要追高</strong>。等待回调到 -15% 开始小批试仓，-30% 再大胆加仓。';
+    dcaText = '定投金额减半 6-12 个月，累积现金等待更好买点。或暂时换到低估值标的对冲。';
+  } else if (d.score < 50) {
+    exitText = '可考虑止盈 10-20%，落袋部分浮盈。保留主仓位享受长期复利。';
+    trimText = '维持当前持仓，但暂停加仓。等回调 10% 再考虑续投。';
+    holdText = '不要追高。等回调 10% 开始小批入场，15-20% 加大力度。';
+    dcaText = '正常定投但金额可减少 30%。保留弹药等更好的位置。';
+  } else if (d.score < 70) {
+    exitText = '不需要主动卖出。继续持有享受趋势。';
+    trimText = '维持当前定投节奏，无需调整。';
+    holdText = '可分批入场，不必等深度回调。';
+    dcaText = '正常定投，节奏不变。';
+  } else {
+    exitText = '不要卖。可以考虑加仓。';
+    trimText = '加大定投力度。';
+    holdText = '<strong style="color:var(--gd);display:inline">良好买入时机</strong>。可适度集中投入。';
+    dcaText = '加大定投金额 50-100%。';
+  }
+
+  document.getElementById('matrix').innerHTML = `
+    <div class="matrix">
+      <div class="matrix-head">DECISION MATRIX · 不同情景下的行动建议</div>
+      <div class="mxgrid">
+        <div class="mx-row exit">
+          <strong>👤 已持仓且收益 > 50%</strong>
+          ${exitText}
+        </div>
+        <div class="mx-row trim">
+          <strong>👤 已持仓但刚买不久</strong>
+          ${trimText}
+        </div>
+        <div class="mx-row hold">
+          <strong>👤 想买入但还没入场</strong>
+          ${holdText}
+        </div>
+        <div class="mx-row dca">
+          <strong>👤 长期定投者（10年+）</strong>
+          ${dcaText}
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:#f0f9ff;border-radius:8px;font-size:11.5px;color:var(--ink2);line-height:1.6;border-left:3px solid var(--cyan)">
+        <strong style="color:var(--blue);display:block;margin-bottom:4px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px">💡 关键原则</strong>
+        "仓位管理 > 择时"。即使所有指标都说卖，也不应一次性清仓——市场可以保持非理性比你保持理性的时间更久。<strong>分批操作、保留底仓、留足现金</strong>是长期最优策略。
+      </div>
+    </div>`;
+}
+
+// 渲染 ETF 切换器
+function renderTabs(activeTicker) {
+  document.getElementById('tabs').innerHTML = ETF_LIST.map(t => `
+    <div class="tab-btn ${t===activeTicker?'active':''}" onclick="switchETF('${t}')">
+      <span class="ticker">${t}</span>
+      <span class="name">${ETF_LABELS[t]}</span>
+    </div>`).join('');
+}
+
+function switchETF(ticker) {
+  renderTabs(ticker);
+  render(ETF_DATA[ticker]);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// 初始化 - 默认显示 SMH
+renderTabs('SMH');
+render(ETF_DATA.SMH);
+
+
+// ============== 自助管理功能 ==============
+const STORAGE_KEY_V4 = 'pulse_pro_v4_etfs';
+const ACTIVE_KEY_V4 = 'pulse_pro_v4_active';
+const DEFAULT_ETFS_V4 = JSON.parse(JSON.stringify(ETF_DATA));
+
+function loadETFs_v4() {
+  const stored = localStorage.getItem(STORAGE_KEY_V4);
+  if (stored) {
+    try { return JSON.parse(stored); } catch (e) {}
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_ETFS_V4));
+}
+function saveETFs_v4(etfs) {
+  localStorage.setItem(STORAGE_KEY_V4, JSON.stringify(etfs));
+  // 同步到 ETF_DATA
+  Object.keys(ETF_DATA).forEach(k => delete ETF_DATA[k]);
+  Object.keys(etfs).forEach(k => ETF_DATA[k] = etfs[k]);
+  ETF_LIST.length = 0;
+  Object.keys(etfs).forEach(k => ETF_LIST.push(k));
+  Object.keys(ETF_LABELS).forEach(k => delete ETF_LABELS[k]);
+  Object.keys(etfs).forEach(k => { ETF_LABELS[k] = etfs[k].category || 'ETF'; });
+}
+function loadActive_v4() {
+  return localStorage.getItem(ACTIVE_KEY_V4) || ETF_LIST[0];
+}
+function saveActive_v4(t) {
+  localStorage.setItem(ACTIVE_KEY_V4, t);
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// 初始化时从 localStorage 加载（如果有的话）
+const _saved = localStorage.getItem(STORAGE_KEY_V4);
+if (_saved) {
+  try {
+    const parsed = JSON.parse(_saved);
+    Object.keys(ETF_DATA).forEach(k => delete ETF_DATA[k]);
+    Object.keys(parsed).forEach(k => ETF_DATA[k] = parsed[k]);
+    ETF_LIST.length = 0;
+    Object.keys(parsed).forEach(k => ETF_LIST.push(k));
+    Object.keys(ETF_LABELS).forEach(k => delete ETF_LABELS[k]);
+    Object.keys(parsed).forEach(k => { ETF_LABELS[k] = parsed[k].category || 'ETF'; });
+  } catch(e) {}
+}
+
+// 重写 renderTabs 以包含"添加"按钮
+const _origRenderTabs = renderTabs;
+renderTabs = function(activeTicker) {
+  if (!activeTicker) activeTicker = loadActive_v4();
+  document.getElementById('tabs').innerHTML = ETF_LIST.map(t => `
+    <div class="tab-btn ${t===activeTicker?'active':''}" onclick="switchETF('${t}')">
+      <span class="ticker">${t}</span>
+      <span class="name">${ETF_LABELS[t]}</span>
+    </div>`).join('') + `<div class="tab-btn add-btn" onclick="openModal('add')">+ 添加</div>`;
+};
+
+// 重写 switchETF 以保存激活状态
+const _origSwitchETF = switchETF;
+switchETF = function(ticker) {
+  saveActive_v4(ticker);
+  renderTabs(ticker);
+  if (ETF_DATA[ticker]) render(ETF_DATA[ticker]);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+};
+
+// Modal 控制
+function openModal(tab) {
+  document.getElementById('modalBg').classList.add('show');
+  if (tab) switchModalTab(tab);
+  else { switchModalTab('list'); }
+}
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('show');
+}
+function switchModalTab(name) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.modal-section').forEach(s => s.classList.remove('show'));
+  const tabMap = {list: 0, add: 1, sources: 2, backup: 3};
+  document.querySelectorAll('.modal-tab')[tabMap[name]].classList.add('active');
+  document.getElementById('tab' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('show');
+  if (name === 'list') renderETFList();
+  if (name === 'add' && !window._editing) clearForm();
+}
+
+function renderETFList() {
+  const tickers = Object.keys(ETF_DATA);
+  if (tickers.length === 0) {
+    document.getElementById('etfList').innerHTML = '<div class="empty-state">还没有 ETF。<br>点上方"添加/编辑"开始。</div>';
+    return;
+  }
+  document.getElementById('etfList').innerHTML = tickers.map(t => `
+    <div class="etf-list-item">
+      <div class="etf-list-info">
+        <span class="etf-list-ticker">${t}</span>
+        <span class="etf-list-name">${ETF_DATA[t].name||''} · 更新于 ${ETF_DATA[t].updatedAt||'未知'}</span>
+      </div>
+      <div class="etf-list-actions">
+        <button class="btn-secondary" onclick="loadETFForEdit('${t}')">编辑</button>
+        <button class="btn-danger" onclick="deleteETF('${t}')">删除</button>
+      </div>
+    </div>`).join('');
+}
+
+function clearForm() {
+  document.querySelectorAll('#tabAdd input').forEach(i => i.value = '');
+  window._editing = null;
+}
+
+function loadETFForEdit(ticker) {
+  const d = ETF_DATA[ticker];
+  if (!d) return;
+  window._editing = ticker;
+  switchModalTab('add');
+  setTimeout(() => {
+    const fields = ['ticker','category','fullName','price','changePct','changeAbs','pe','yearReturn','weekHigh52','weekLow52','rsi','ma50','ma200','putCall','mfi','relStrength','flow5d','flow1m','flow3m','flow1y','insiderTicker','insiderBuy','insiderSell','f13Buy','f13Sell','f13Inflow','f13Outflow','smartMoneyDiv','aaiiSentiment','earningsGrowth','priceGrowth','return1Y_pct','return3Y_pct'];
+    document.getElementById('f-ticker').value = ticker;
+    fields.forEach(f => {
+      const el = document.getElementById('f-' + f);
+      if (el && f !== 'ticker') {
+        el.value = (d[f] !== null && d[f] !== undefined) ? d[f] : '';
+      }
+    });
+  }, 50);
+}
+
+function saveETF() {
+  const ticker = document.getElementById('f-ticker').value.trim().toUpperCase();
+  const category = document.getElementById('f-category').value.trim();
+  const fullName = document.getElementById('f-fullName').value.trim();
+  if (!ticker || !category || !fullName) {
+    showToast('⚠ 请填写代码、类别、完整名称');
+    return;
+  }
+  const v = id => {
+    const x = document.getElementById(id).value;
+    return x === '' ? null : parseFloat(x);
+  };
+  const s = id => document.getElementById(id).value.trim() || null;
+
+  // 计算评分（用同样的简化算法，给出合理默认）
+  const pe = v('f-pe'), rsi = v('f-rsi'), flow5d = v('f-flow5d'), flow1y = v('f-flow1y');
+  const insiderSell = v('f-insiderSell') ?? 0, insiderBuy = v('f-insiderBuy') ?? 0;
+  const yearReturn = v('f-yearReturn') ?? 0, putCall = v('f-putCall'), relStrength = v('f-relStrength') ?? 0;
+
+  let valScore = 25;
+  if (pe !== null) {
+    if (pe > 50) valScore = 5; else if (pe > 35) valScore = 10;
+    else if (pe > 25) valScore = 15; else if (pe > 18) valScore = 20;
+  }
+  if (yearReturn > 100) valScore = Math.max(0, valScore - 5);
+
+  let flowScore = 25;
+  if (flow5d !== null && flow1y !== null) {
+    if (flow5d < 0 && flow1y > 0) flowScore = 5;
+    else if (flow5d < 0) flowScore = 10;
+    else if (flow5d > 0 && flow1y > 0) flowScore = 22;
+  }
+  if (insiderSell > 50 && insiderBuy < 5) flowScore = Math.max(0, flowScore - 5);
+
+  let techScore = 50;
+  if (rsi !== null) {
+    if (rsi > 80) techScore = 10; else if (rsi > 70) techScore = 20;
+    else if (rsi > 50) techScore = 35; else if (rsi < 30) techScore = 45;
+  }
+  if (relStrength > 70) techScore = Math.max(0, techScore - 5);
+  if (putCall !== null && putCall < 0.7) techScore = Math.max(0, techScore - 5);
+
+  const total = valScore + flowScore + techScore;
+  let scoreLabel, scoreColor, alertType, alertTitle, alertText;
+  if (total < 30) {
+    scoreLabel = '极不建议追高'; scoreColor = 'r';
+    alertType = 'red'; alertTitle = '🚨 多重风险信号';
+    alertText = `${ticker} 综合评分仅 ${total}/100，估值、资金流向、技术情绪均亮红灯，建议高度警惕。`;
+  } else if (total < 50) {
+    scoreLabel = '中性偏空 · 谨慎'; scoreColor = 'a';
+    alertType = 'amber'; alertTitle = '⚠ 信号偏空，谨慎操作';
+    alertText = `${ticker} 综合评分 ${total}/100，部分指标已偏热，不建议追高。`;
+  } else if (total < 70) {
+    scoreLabel = '中性 · 常规节奏'; scoreColor = 'a';
+    alertType = 'amber'; alertTitle = '⚖ 信号混合';
+    alertText = `${ticker} 综合评分 ${total}/100，处于中性区间，建议常规定投，不必激进。`;
+  } else {
+    scoreLabel = '良好买入时机'; scoreColor = 'g';
+    alertType = 'green'; alertTitle = '✓ 多维度健康';
+    alertText = `${ticker} 综合评分 ${total}/100，资金面健康、估值合理，可适度加大配置。`;
+  }
+
+  const newETF = {
+    name: ticker + ' ' + category + 'ETF',
+    fullName,
+    category,
+    price: v('f-price'),
+    changePct: v('f-changePct'),
+    changeAbs: v('f-changeAbs'),
+    pe,
+    yearReturn,
+    weekHigh52: v('f-weekHigh52'),
+    weekLow52: v('f-weekLow52'),
+    rsi,
+    rsiChange: 0,
+    rsiZone: rsi !== null ? (rsi > 80 ? 'r' : rsi > 70 ? 'a' : 'g') : 'g',
+    rsiLabel: rsi !== null ? (rsi > 80 ? '超买 EXTREME' : rsi > 70 ? '偏强 OVERBOUGHT' : rsi < 30 ? '超卖 OVERSOLD' : '中性 NEUTRAL') : '中性 NEUTRAL',
+    ma50: v('f-ma50'),
+    ma200: v('f-ma200'),
+    ma50pct: (v('f-price') && v('f-ma50')) ? ((v('f-price') - v('f-ma50')) / v('f-ma50') * 100).toFixed(1) : 0,
+    ma200pct: (v('f-price') && v('f-ma200')) ? ((v('f-price') - v('f-ma200')) / v('f-ma200') * 100).toFixed(1) : 0,
+    relStrength,
+    relZone: relStrength > 70 ? 'r' : relStrength > 30 ? 'a' : 'g',
+    relLabel: relStrength > 70 ? '极度狂热' : relStrength > 30 ? '板块强势' : relStrength === 0 ? '基准（自身）' : '与基准相近',
+    putCall,
+    flow5d, flow1m: v('f-flow1m'), flow3m: v('f-flow3m'), flow1y,
+    insiderSell, insiderBuy,
+    insiderTicker: s('f-insiderTicker') || 'N/A',
+    f13Buy: v('f-f13Buy') ?? 0,
+    f13Sell: v('f-f13Sell') ?? 0,
+    f13Inflow: v('f-f13Inflow') ?? 0,
+    f13Outflow: v('f-f13Outflow') ?? 0,
+    mfi: v('f-mfi') ?? 50,
+    aaiiSentiment: v('f-aaiiSentiment') ?? 45,
+    earningsGrowth: v('f-earningsGrowth') ?? 0,
+    priceGrowth: v('f-priceGrowth') ?? yearReturn ?? 0,
+    return1Y_pct: v('f-return1Y_pct') ?? 50,
+    return3Y_pct: v('f-return3Y_pct') ?? 50,
+    smartMoneyDiv: v('f-smartMoneyDiv') ?? 0,
+    score: total, scoreLabel, scoreColor, valScore, flowScore, techScore,
+    alertType, alertTitle, alertText,
+    updatedAt: new Date().toISOString().slice(0, 10)
+  };
+
+  ETF_DATA[ticker] = newETF;
+  if (!ETF_LIST.includes(ticker)) ETF_LIST.push(ticker);
+  ETF_LABELS[ticker] = category;
+
+  saveETFs_v4(ETF_DATA);
+  showToast('✓ 已保存 ' + ticker);
+  clearForm();
+  renderTabs();
+  switchETF(ticker);
+  closeModal();
+}
+
+function deleteETF(ticker) {
+  if (!confirm('确定删除 ' + ticker + ' 吗？')) return;
+  delete ETF_DATA[ticker];
+  delete ETF_LABELS[ticker];
+  const idx = ETF_LIST.indexOf(ticker);
+  if (idx > -1) ETF_LIST.splice(idx, 1);
+  saveETFs_v4(ETF_DATA);
+  showToast('✓ 已删除 ' + ticker);
+  renderTabs();
+  renderETFList();
+  if (ETF_LIST.length > 0) switchETF(ETF_LIST[0]);
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(ETF_DATA, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pulse_etfs_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ 备份已下载');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (typeof data !== 'object') throw new Error('格式错误');
+      saveETFs_v4(data);
+      const tickers = Object.keys(data);
+      if (tickers.length > 0) saveActive_v4(tickers[0]);
+      showToast('✓ 已恢复 ' + tickers.length + ' 个 ETF');
+      renderTabs();
+      renderETFList();
+      if (tickers.length > 0) switchETF(tickers[0]);
+    } catch(err) {
+      showToast('❌ 文件格式错误');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetAll() {
+  localStorage.removeItem(STORAGE_KEY_V4);
+  localStorage.removeItem(ACTIVE_KEY_V4);
+  Object.keys(ETF_DATA).forEach(k => delete ETF_DATA[k]);
+  Object.keys(DEFAULT_ETFS_V4).forEach(k => ETF_DATA[k] = DEFAULT_ETFS_V4[k]);
+  ETF_LIST.length = 0;
+  Object.keys(DEFAULT_ETFS_V4).forEach(k => ETF_LIST.push(k));
+  Object.keys(ETF_LABELS).forEach(k => delete ETF_LABELS[k]);
+  Object.keys(DEFAULT_ETFS_V4).forEach(k => { ETF_LABELS[k] = DEFAULT_ETFS_V4[k].category || 'ETF'; });
+  showToast('✓ 已重置为默认');
+  renderTabs();
+  switchETF(Object.keys(ETF_DATA)[0]);
+  closeModal();
+}
+
+// 初始切换到上次激活的 ETF
+const _savedActive = localStorage.getItem(ACTIVE_KEY_V4);
+if (_savedActive && ETF_DATA[_savedActive]) {
+  setTimeout(() => switchETF(_savedActive), 50);
+}
+
+</script>
+
+<!-- 管理面板 Modal -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">📊 管理我的 ETF</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchModalTab('list')">我的列表</button>
+      <button class="modal-tab" onclick="switchModalTab('add')">添加/编辑</button>
+      <button class="modal-tab" onclick="switchModalTab('sources')">数据源指南</button>
+      <button class="modal-tab" onclick="switchModalTab('backup')">备份/恢复</button>
+    </div>
+
+    <div class="modal-section show" id="tabList">
+      <div id="etfList"></div>
+    </div>
+
+    <div class="modal-section" id="tabAdd">
+      <div class="form-helper" style="margin-bottom:14px;padding:10px;background:#f0f9ff;border-radius:8px;border-left:3px solid var(--cyan)">
+        💡 填写有数据的字段即可，留空字段会自动隐藏对应卡片。所有数据保存在你浏览器本地。
+      </div>
+
+      <div class="section-head">基础信息（必填）</div>
+      <div class="form-grid2">
+        <div class="form-row">
+          <label class="form-label">代码 *</label>
+          <input class="form-input small" id="f-ticker" placeholder="如 NVDA, IWM, TSLA" maxlength="6">
+        </div>
+        <div class="form-row">
+          <label class="form-label">类别（中文）*</label>
+          <input class="form-input small" id="f-category" placeholder="如 半导体、AI龙头" maxlength="10">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">完整名称 *</label>
+        <input class="form-input small" id="f-fullName" placeholder="如 NVIDIA · AI 芯片龙头">
+      </div>
+
+      <div class="section-head">价格 & 估值</div>
+      <div class="form-grid3">
+        <div class="form-row"><label class="form-label">价格 ($)</label><input class="form-input small" id="f-price" type="number" step="0.01" placeholder="566.54"></div>
+        <div class="form-row"><label class="form-label">日涨幅 (%)</label><input class="form-input small" id="f-changePct" type="number" step="0.01" placeholder="4.90"></div>
+        <div class="form-row"><label class="form-label">日涨额 ($)</label><input class="form-input small" id="f-changeAbs" type="number" step="0.01" placeholder="26.44"></div>
+      </div>
+      <div class="form-grid3">
+        <div class="form-row"><label class="form-label">P/E</label><input class="form-input small" id="f-pe" type="number" step="0.1" placeholder="51.0"></div>
+        <div class="form-row"><label class="form-label">年内涨幅 (%)</label><input class="form-input small" id="f-yearReturn" type="number" placeholder="151"></div>
+        <div class="form-row"><label class="form-label">52周高 ($)</label><input class="form-input small" id="f-weekHigh52" type="number" step="0.01" placeholder="569.55"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">52周低 ($)</label><input class="form-input small" id="f-weekLow52" type="number" step="0.01" placeholder="220.10"></div>
+        <div class="form-row"><label class="form-label">板块相对强度 (%)</label><input class="form-input small" id="f-relStrength" type="number" placeholder="108"></div>
+      </div>
+
+      <div class="section-head">技术指标</div>
+      <div class="form-grid3">
+        <div class="form-row"><label class="form-label">RSI(14)</label><input class="form-input small" id="f-rsi" type="number" step="0.1" placeholder="81.4"></div>
+        <div class="form-row"><label class="form-label">50日均线 ($)</label><input class="form-input small" id="f-ma50" type="number" placeholder="478"></div>
+        <div class="form-row"><label class="form-label">200日均线 ($)</label><input class="form-input small" id="f-ma200" type="number" placeholder="380"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">Put/Call 比率</label><input class="form-input small" id="f-putCall" type="number" step="0.01" placeholder="0.62"></div>
+        <div class="form-row"><label class="form-label">MFI 资金流量指数</label><input class="form-input small" id="f-mfi" type="number" placeholder="88"></div>
+      </div>
+
+      <div class="section-head">资金流向（百万美元）</div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">5天资金流</label><input class="form-input small" id="f-flow5d" type="number" placeholder="-438"></div>
+        <div class="form-row"><label class="form-label">1月资金流</label><input class="form-input small" id="f-flow1m" type="number" placeholder="2770"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">3月资金流</label><input class="form-input small" id="f-flow3m" type="number" placeholder="3640"></div>
+        <div class="form-row"><label class="form-label">1年资金流</label><input class="form-input small" id="f-flow1y" type="number" placeholder="9120"></div>
+      </div>
+
+      <div class="section-head">内部人士交易（百万美元，3个月）</div>
+      <div class="form-grid3">
+        <div class="form-row"><label class="form-label">代表股票</label><input class="form-input small" id="f-insiderTicker" placeholder="NVDA"><div class="form-helper">指数填N/A</div></div>
+        <div class="form-row"><label class="form-label">买入金额</label><input class="form-input small" id="f-insiderBuy" type="number" placeholder="0"></div>
+        <div class="form-row"><label class="form-label">卖出金额</label><input class="form-input small" id="f-insiderSell" type="number" placeholder="163.7"></div>
+      </div>
+
+      <div class="section-head">13F 机构 + 进阶指标</div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">13F 买入家数</label><input class="form-input small" id="f-f13Buy" type="number" placeholder="573"></div>
+        <div class="form-row"><label class="form-label">13F 卖出家数</label><input class="form-input small" id="f-f13Sell" type="number" placeholder="269"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">13F 流入 ($B)</label><input class="form-input small" id="f-f13Inflow" type="number" step="0.01" placeholder="2.85"></div>
+        <div class="form-row"><label class="form-label">13F 流出 ($B)</label><input class="form-input small" id="f-f13Outflow" type="number" step="0.01" placeholder="1.25"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">Smart Money Div (%)</label><input class="form-input small" id="f-smartMoneyDiv" type="number" step="0.1" placeholder="-8.2"></div>
+        <div class="form-row"><label class="form-label">AAII 散户看涨 (%)</label><input class="form-input small" id="f-aaiiSentiment" type="number" placeholder="62"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">盈利增长 (%)</label><input class="form-input small" id="f-earningsGrowth" type="number" placeholder="28"></div>
+        <div class="form-row"><label class="form-label">价格增长 (%)</label><input class="form-input small" id="f-priceGrowth" type="number" placeholder="151"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">1年回报历史分位 (%)</label><input class="form-input small" id="f-return1Y_pct" type="number" placeholder="99"></div>
+        <div class="form-row"><label class="form-label">3年回报历史分位 (%)</label><input class="form-input small" id="f-return3Y_pct" type="number" placeholder="95"></div>
+      </div>
+
+      <button class="btn-primary" onclick="saveETF()">保存 ETF</button>
+    </div>
+
+    <div class="modal-section" id="tabSources">
+      <div class="form-helper" style="margin-bottom:14px;padding:10px;background:#f0fdf4;border-radius:8px;border-left:3px solid var(--green)">
+        ✨ 这里告诉你<strong>每个数据从哪里查</strong>。所有数据源都是免费的。
+      </div>
+      <div class="section-head">基础数据 + 技术指标</div>
+      <div class="sources-grid">
+        <div class="source-item">
+          <strong>📊 stockanalysis.com</strong>
+          <a href="https://stockanalysis.com/etf/" target="_blank">stockanalysis.com/etf/</a>
+          <div class="desc">价格、P/E、52周区间、RSI、MA一站式</div>
+        </div>
+        <div class="source-item">
+          <strong>📈 Yahoo Finance</strong>
+          <a href="https://finance.yahoo.com" target="_blank">finance.yahoo.com</a>
+          <div class="desc">历史价格、年化回报、ETF基本信息</div>
+        </div>
+      </div>
+      <div class="section-head">资金流向 + 机构数据</div>
+      <div class="sources-grid">
+        <div class="source-item">
+          <strong>💰 etfdb.com</strong>
+          <a href="https://etfdb.com/etf/" target="_blank">etfdb.com/etf/</a>
+          <div class="desc">ETF资金流（5天/1月/3月/1年）最权威</div>
+        </div>
+        <div class="source-item">
+          <strong>🏛 marketbeat.com</strong>
+          <a href="https://marketbeat.com" target="_blank">marketbeat.com</a>
+          <div class="desc">13F机构持仓、内部人士交易</div>
+        </div>
+      </div>
+      <div class="section-head">期权 + 散户情绪 + MFI</div>
+      <div class="sources-grid">
+        <div class="source-item">
+          <strong>🎲 CBOE</strong>
+          <a href="https://cboe.com" target="_blank">cboe.com</a>
+          <div class="desc">Put/Call比率官方源</div>
+        </div>
+        <div class="source-item">
+          <strong>👥 AAII Sentiment</strong>
+          <a href="https://aaii.com/sentimentsurvey" target="_blank">aaii.com/sentimentsurvey</a>
+          <div class="desc">散户情绪（每周三更新）</div>
+        </div>
+        <div class="source-item">
+          <strong>📉 TradingView</strong>
+          <a href="https://tradingview.com" target="_blank">tradingview.com</a>
+          <div class="desc">MFI、Smart Money 等高级指标</div>
+        </div>
+        <div class="source-item">
+          <strong>🔍 Finviz</strong>
+          <a href="https://finviz.com" target="_blank">finviz.com</a>
+          <div class="desc">短期交易数据、Insider 二次确认</div>
+        </div>
+      </div>
+      <div class="section-head">💡 推荐工作流</div>
+      <div class="form-helper" style="padding:12px;background:#fafafa;border-radius:8px;line-height:1.7">
+        <strong>每周一次更新（建议周日晚上）：</strong><br>
+        1️⃣ 打开 stockanalysis.com 输入ETF代码 → 复制：价格、P/E、RSI、52周高低、MA<br>
+        2️⃣ 打开 etfdb.com → 复制：5天/1月/3月/1年资金流<br>
+        3️⃣ 打开 marketbeat.com → 找代表股票的内部人士交易、13F<br>
+        4️⃣ 周三看 AAII 网站获取散户情绪<br>
+        5️⃣ 回到这里点"管理"→ 找到对应ETF点"编辑"→ 填入新数据<br><br>
+        <strong style="color:var(--cyan)">总耗时：每个 ETF 约 3-5 分钟</strong>
+      </div>
+    </div>
+
+    <div class="modal-section" id="tabBackup">
+      <div class="form-helper" style="margin-bottom:14px;padding:10px;background:#fffbeb;border-radius:8px;border-left:3px solid var(--amber)">
+        ⚠️ 数据保存在你浏览器本地。<strong>清浏览器缓存会丢失</strong>，建议定期备份。
+      </div>
+      <div class="section-head">导出备份</div>
+      <button class="btn-secondary" onclick="exportData()" style="width:100%;margin-bottom:14px">📥 导出当前所有数据为 JSON 文件</button>
+      <div class="section-head">从备份恢复</div>
+      <div class="form-row">
+        <input type="file" id="importFile" accept=".json" class="form-input small" onchange="importData(event)">
+        <div class="form-helper">选择之前导出的 .json 文件来恢复数据</div>
+      </div>
+      <div class="section-head">⚠️ 危险操作</div>
+      <button class="btn-danger" onclick="if(confirm('确定要清空所有自定义数据并重置为默认ETF吗？此操作不可恢复！'))resetAll()" style="width:100%">🗑 重置为默认</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+</body>
+</html>
